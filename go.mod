@@ -1,4 +1,4 @@
-module github.com/andamio-platform/andamio-indexerr
+module github.com/Andamio-Platform/andamio-indexer
 
 go 1.23.6
 
@@ -7,12 +7,11 @@ toolchain go1.23.8
 require (
 	github.com/Salvionied/apollo v1.1.1
 	github.com/blinklabs-io/adder v0.28.0
-	github.com/blinklabs-io/dingo v0.4.6
 	github.com/blinklabs-io/gouroboros v0.116.0
 	github.com/dgraph-io/badger/v4 v4.7.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/gofiber/fiber/v2 v2.52.6
-	github.com/kelseyhightower/envconfig v1.4.0
+	github.com/gorilla/mux v1.8.1
 	github.com/prometheus/client_golang v1.22.0
 	gorm.io/gorm v1.25.12
 	gorm.io/plugin/opentelemetry v0.1.12
@@ -20,7 +19,6 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
-	github.com/Andamio-Platform/andamio-indexer v0.0.0-20250416141106-9cb0f3b628e7 // indirect
 	github.com/SundaeSwap-finance/kugo v1.1.0 // indirect
 	github.com/SundaeSwap-finance/ogmigo v0.9.0 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
@@ -37,12 +35,12 @@ require (
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/google/flatbuffers v25.2.10+incompatible // indirect
 	github.com/google/uuid v1.6.0 // indirect
-	github.com/gorilla/mux v1.8.1 // indirect
 	github.com/gorilla/websocket v1.5.3 // indirect
 	github.com/jinzhu/copier v0.4.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
+	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
 	github.com/maestro-org/go-sdk v1.2.1 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect

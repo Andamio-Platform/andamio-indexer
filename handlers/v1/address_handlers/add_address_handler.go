@@ -44,15 +44,10 @@ func AddAddressHandler(db *database.Database, logger *slog.Logger) http.HandlerF
 			}
 		}()
 
-		err = db.Metadata().AddAddress(addressRequest.Address, txn.DB())
+		err = db.Metadata().AddAddress(addressRequest.Address, txn)
 		if err != nil {
 			txn.Rollback()
 			logger.Error("failed to add address to database", "error", err)
-			w.WriteHeader(http.StatusInternalServerError)
-			json.NewEncoder(w).Encode(Response{Message: "Failed to add address"})
-			return
-		} else {
-			logger.Error("failed to commit transaction", "error", err)
 			w.WriteHeader(http.StatusInternalServerError)
 			json.NewEncoder(w).Encode(Response{Message: "Failed to add address"})
 			return

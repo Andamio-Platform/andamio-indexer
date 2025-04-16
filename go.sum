@@ -1,7 +1,5 @@
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
-github.com/Andamio-Platform/andamio-indexer v0.0.0-20250416141106-9cb0f3b628e7 h1:Upr1ylppAVlFQcEcrk//NpE8nW/cQaeOT+ZDYgXElVQ=
-github.com/Andamio-Platform/andamio-indexer v0.0.0-20250416141106-9cb0f3b628e7/go.mod h1:gpCxafFq92iD7/fYfVVU0TwvyhDVHMhqn04mIhD3LSs=
 github.com/Salvionied/apollo v1.1.1 h1:8Iw4m9bwLbDjebQbbkqNlfvyrjS0Oy3bRZuo2ra0Ifg=
 github.com/Salvionied/apollo v1.1.1/go.mod h1:v1jv3hFtZziqAk87yCJf7RxTa6F+HqfhKkHxcxHLYxw=
 github.com/SundaeSwap-finance/kugo v1.1.0 h1:9fzzqiRcyOD8NF2L7I8aJArtyiYg9pu54SEoFKLs8JI=
@@ -17,8 +15,6 @@ github.com/beorn7/perks v1.0.1 h1:VlbKKnNfV8bJzeqoa4cOKqO6bYr3WgKZxO8Z16+hsOM=
 github.com/beorn7/perks v1.0.1/go.mod h1:G2ZrVWU2WbWT9wwq4/hrbKbnv/1ERSJQ0ibhJ6rlkpw=
 github.com/blinklabs-io/adder v0.28.0 h1:CrJ2jwR/LX+O1qHGNanR4bJulMX2tuIH6L8XhVGpmGA=
 github.com/blinklabs-io/adder v0.28.0/go.mod h1:K0ccxldfxDteR2cwizVoga1eYXRgpTyMbwZaotj1+Ns=
-github.com/blinklabs-io/dingo v0.4.6 h1:iqxTRYign+Dn7rlvwFAu36o+PNm+X8z+an3JxgAe11M=
-github.com/blinklabs-io/dingo v0.4.6/go.mod h1:4yTvZVKzsKCFj9PGTg0ezLddY8t9v/i+P1IWaXdOF28=
 github.com/blinklabs-io/gouroboros v0.116.0 h1:B+2HUCdMgu1TRlME1Y1ds+nhzmgKLuJwdq7nfSJta08=
 github.com/blinklabs-io/gouroboros v0.116.0/go.mod h1:g4e4aqLWcsRCgwk1KLq49CJF4uNq/ZXAp4Z63BbSo4o=
 github.com/blinklabs-io/ouroboros-mock v0.3.7 h1:86FvD591XhdGk2BqQweRKfwc6Y6ll5Lunmo/RUehJ6o=
