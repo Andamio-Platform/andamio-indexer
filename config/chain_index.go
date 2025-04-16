@@ -1,8 +1,8 @@
 package config
 
 import (
-	"github.com/Andamio-Platform/andamio-indexer/constants"
 	"github.com/Salvionied/apollo/txBuilding/Backend/MaestroChainContext"
+	"github.com/Andamio-Platform/andamio-indexer/constants"
 )
 
 var (

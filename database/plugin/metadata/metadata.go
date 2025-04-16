@@ -15,5 +15,5 @@
 package metadata
 
 import (
-	_ "github.com/andamio-platform/andamio-indexer/database/plugin/metadata/sqlite"
+	_ "github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite"
 )

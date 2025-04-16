@@ -1,5 +1,7 @@
 filippo.io/edwards25519 v1.1.0 h1:FNf4tywRC1HmFuKW5xopWpigGjJKiJSV0Cqo0cJWDaA=
 filippo.io/edwards25519 v1.1.0/go.mod h1:BxyFTGdWcka3PhytdK4V28tE5sGfRvvvRV7EaN4VDT4=
+github.com/Andamio-Platform/andamio-indexer v0.0.0-20250416141106-9cb0f3b628e7 h1:Upr1ylppAVlFQcEcrk//NpE8nW/cQaeOT+ZDYgXElVQ=
+github.com/Andamio-Platform/andamio-indexer v0.0.0-20250416141106-9cb0f3b628e7/go.mod h1:gpCxafFq92iD7/fYfVVU0TwvyhDVHMhqn04mIhD3LSs=
 github.com/Salvionied/apollo v1.1.1 h1:8Iw4m9bwLbDjebQbbkqNlfvyrjS0Oy3bRZuo2ra0Ifg=
 github.com/Salvionied/apollo v1.1.1/go.mod h1:v1jv3hFtZziqAk87yCJf7RxTa6F+HqfhKkHxcxHLYxw=
 github.com/SundaeSwap-finance/kugo v1.1.0 h1:9fzzqiRcyOD8NF2L7I8aJArtyiYg9pu54SEoFKLs8JI=

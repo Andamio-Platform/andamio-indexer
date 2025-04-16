@@ -15,7 +15,7 @@
 package sqlite
 
 import (
-	"github.com/andamio-platform/andamio-indexer/database/plugin/metadata/sqlite/models"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 	"gorm.io/gorm"
 )
 

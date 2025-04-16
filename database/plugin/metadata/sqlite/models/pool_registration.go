@@ -17,7 +17,7 @@ package models
 import (
 	"net"
 
-	"github.com/andamio-platform/andamio-indexer/database/types"
+	"github.com/Andamio-Platform/andamio-indexer/database/types"
 )
 
 type PoolRegistration struct {

@@ -16,8 +16,8 @@ package sqlite
 
 import (
 	"errors"
-	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 
 	"fmt"
 	"io"
@@ -239,8 +239,8 @@ func (d *MetadataStoreSqlite) GetAddress(address string, txn *gorm.DB) (string, 
 	if result.Error != nil {
 		return "", result.Error
 	}
-    if result.RowsAffected == 0 {
-        return "", gorm.ErrRecordNotFound
-    }
+	if result.RowsAffected == 0 {
+		return "", gorm.ErrRecordNotFound
+	}
 	return addr.Address, nil
 }

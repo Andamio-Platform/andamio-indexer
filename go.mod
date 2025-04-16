@@ -1,4 +1,4 @@
-module github.com/Andamio-Platform/andamio-indexer
+module github.com/andamio-platform/andamio-indexerr
 
 go 1.23.6
 
@@ -20,6 +20,7 @@ require (
 
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
+	github.com/Andamio-Platform/andamio-indexer v0.0.0-20250416141106-9cb0f3b628e7 // indirect
 	github.com/SundaeSwap-finance/kugo v1.1.0 // indirect
 	github.com/SundaeSwap-finance/ogmigo v0.9.0 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect

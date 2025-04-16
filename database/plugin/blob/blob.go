@@ -15,5 +15,5 @@
 package blob
 
 import (
-	_ "github.com/andamio-platform/andamio-indexer/database/plugin/blob/badger"
+	_ "github.com/Andamio-Platform/andamio-indexer/database/plugin/blob/badger"
 )

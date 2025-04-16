@@ -24,7 +24,7 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/andamio-platform/andamio-indexer/database/plugin"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin"
 	badger "github.com/dgraph-io/badger/v4"
 )
 

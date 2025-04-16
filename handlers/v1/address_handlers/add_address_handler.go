@@ -58,16 +58,16 @@ func AddAddressHandler(db *database.Database, logger *slog.Logger) http.HandlerF
 			return
 		}
 
-				if txn != nil {
-					err = txn.Commit().Error
-					if err != nil {
-						txn.Rollback()
-						logger.Error("failed to commit transaction", "error", err)
-						w.WriteHeader(http.StatusInternalServerError)
-						json.NewEncoder(w).Encode(Response{Message: "Failed to add address"})
-						return
-					}
-				}
+		if txn != nil {
+			err = txn.Commit().Error
+			if err != nil {
+				txn.Rollback()
+				logger.Error("failed to commit transaction", "error", err)
+				w.WriteHeader(http.StatusInternalServerError)
+				json.NewEncoder(w).Encode(Response{Message: "Failed to add address"})
+				return
+			}
+		}
 		logger.Info("address added successfully", "address", addressRequest.Address)
 		w.WriteHeader(http.StatusCreated)
 		json.NewEncoder(w).Encode(Response{Message: "Address added successfully"})

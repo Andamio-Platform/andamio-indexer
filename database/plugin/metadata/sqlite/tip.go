@@ -17,7 +17,7 @@ package sqlite
 import (
 	"errors"
 
-	"github.com/andamio-platform/andamio-indexer/database/plugin/metadata/sqlite/models"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 	ochainsync "github.com/blinklabs-io/gouroboros/protocol/chainsync"
 	ocommon "github.com/blinklabs-io/gouroboros/protocol/common"
 	"gorm.io/gorm"

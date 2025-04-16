@@ -3,9 +3,9 @@ package router
 import (
 	"log"
 
-	"github.com/Andamio-Platform/andamio-indexer/config"
-	"github.com/Andamio-Platform/andamio-indexer/database"
-	address_handlers "github.com/Andamio-Platform/andamio-indexer/handlers/v1/address_handlers"
+	"github.com/andamio-platform/andamio-indexer/config"
+	"github.com/andamio-platform/andamio-indexer/database"
+	address_handlers "github.com/andamio-platform/andamio-indexer/handlers/v1/address_handlers"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"

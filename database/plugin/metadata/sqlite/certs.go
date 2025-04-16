@@ -15,8 +15,8 @@
 package sqlite
 
 import (
-	"github.com/andamio-platform/andamio-indexer/database/plugin/metadata/sqlite/models"
-	"github.com/andamio-platform/andamio-indexer/database/types"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
+	"github.com/Andamio-Platform/andamio-indexer/database/types"
 	"github.com/blinklabs-io/gouroboros/cbor"
 	lcommon "github.com/blinklabs-io/gouroboros/ledger/common"
 	"gorm.io/gorm"

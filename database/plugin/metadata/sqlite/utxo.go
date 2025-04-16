@@ -17,7 +17,7 @@ package sqlite
 import (
 	"fmt"
 
-	"github.com/andamio-platform/andamio-indexer/database/plugin/metadata/sqlite/models"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 	"github.com/blinklabs-io/gouroboros/ledger"
 	"gorm.io/gorm"
 )

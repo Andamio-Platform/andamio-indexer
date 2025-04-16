@@ -21,8 +21,8 @@ import (
 
 	"github.com/blinklabs-io/gouroboros/ledger"
 
-	"github.com/andamio-platform/andamio-indexer/database/plugin/blob"
-	"github.com/andamio-platform/andamio-indexer/database/plugin/metadata"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/blob"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata"
 )
 
 // Database represents our data storage services

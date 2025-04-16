@@ -17,7 +17,7 @@ package blob
 import (
 	"log/slog"
 
-	badgerPlugin "github.com/andamio-platform/andamio-indexer/database/plugin/blob/badger"
+	badgerPlugin "github.com/Andamio-Platform/andamio-indexer/database/plugin/blob/badger"
 	badger "github.com/dgraph-io/badger/v4"
 )
 
