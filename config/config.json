@@ -1,0 +1,52 @@
+{
+  "network": {
+    "magic": 1,
+    "socketPath": "/ipc/node.socket"
+  },
+  "database": {
+    "databaseDir": "./db"
+  },
+  "andamio": {
+    "globalAdmin": "b851e054cf4ea963611bafc924f3cd55d635be1a840fb8a69c09df95.476c6f62616c41646d696e",
+    "globalStateRefMS": {
+      "mSCAddress": "addr_test1xp69xmvurx2uesfydnz9ms7huvzafvlejwfna8rer72hlwuke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzqjte2n7",
+      "mSCPolicyID": "8ee2ae14d5d1433b8984ed9dd15e9a206c5224d71b10f709d952ca03",
+      "mSCTxRef": "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7#1"
+    },
+    "globalStateS": {
+      "sCAddress": "addr_test1xr7xs02kjwr7v3frqrx4exearkd5nmx5ashhzsj5l3nja7yke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzq6ptcdp",
+      "sCTxRef": "8a3a9c393bec05d40b73ed459a10a5c9c7a11f197c88d1aaca48080a2e48e7c5#0"
+    },
+    "governanceS": {
+      "sCAddress": "addr_test1xzx8yjaufqwec9vnze5a4mqpuxuxasks9tvut534cc44ft5ke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzqs0v3wq",
+      "sCTxRef": "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7#3"
+    },
+    "indexAdmin": "0967c379009607b370d973c40cf071981d1f5e8dc2c204916b792ac8.496e64657841646d696e",
+    "indexMS": {
+      "mSCAddress": "addr_test1xrrkcdgg3tyzdj9qu628erlh3kx5f9tcn0rjjsvm8ge5xpvke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzqs6wq6p",
+      "mSCPolicyID": "c76c35088ac826c8a0e6947c8ff78d8d4495789bc729419b3a334305",
+      "mSCTxRef": "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7#7"
+    },
+    "indexRefMS": {
+      "mSCAddress": "addr_test1xqzp3cel9p95shlsaertqrt0wcmym5y780ljmca80k4u8ruke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzqdxy5xn",
+      "mSCPolicyID": "3ff4fba4491339dc471538763a7d87df527757473a0c70b017400730",
+      "mSCTxRef": "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7#2"
+    },
+    "instanceAdmin": "333e93158e1a32d411dae407259c64892d82ce1e80e594de1a94394e.496e7374616e636541646d696e",
+    "instanceMS": {
+      "mSCAddress": "addr_test1xpyga27u94rsgnzdgu4df3w8mes538dymt5dhqlszgmfxeyke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzqcrqkuk",
+      "mSCPolicyID": "488eabdc2d47044c4d472ad4c5c7de61489da4dae8db83f012369364",
+      "mSCTxRef": "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7#4"
+    },
+    "instanceProvidedMS": {
+      "mSCAddress": "addr_test1xra9ne75azha7sa3pq5letmml6ugsh4fppwhfhk088jm8tyke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzq0lvt5x",
+      "mSCPolicyID": "fa59e7d4e8afdf43b10829fcaf7bfeb8885ea9085d74decf39e5b3ac",
+      "mSCTxRef": "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7#0"
+    },
+    "instanceProviderAdmin": "ec9c0c9caf00968266551e9f6b24b3f3637b8aea9b6c29d61aa9f725.496e7374616e636550726f7669646572",
+    "referenceAddr": "addr_test1qrk3ahz8vfyudwxzkk900vyh4kwvvkupezuztxs2uhxegx33r7tjl95j976frv930fsr4e3fnzff66tglgwjzva3f8vsas3rxn",
+    "stakingAdmin": "86d9570a264f3663af8791c16cfe0b18768495df90af551aa14bb6ca.5374616b696e6741646d696e",
+    "stakingSH": "96c9cc5d8649f772392e338cd2da2e62b26ff08c2f2ec29ac1a43b44",
+    "v1GlobalStateObsTxRef": "8a3a9c393bec05d40b73ed459a10a5c9c7a11f197c88d1aaca48080a2e48e7c5#1"
+  }
+}

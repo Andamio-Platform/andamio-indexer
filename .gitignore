@@ -1,0 +1,5 @@
+bin/\n*.exe\n*.log\n*.out
+build/
+db/
+*.log
+*.tmp
