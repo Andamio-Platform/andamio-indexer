@@ -137,6 +137,27 @@ type MetadataStore interface {
 	// Address
 	AddAddress(address string, txn *gorm.DB) error
 	GetAddress(address string, txn *gorm.DB) (string, error)
+	GetAllAddresses(txn *gorm.DB) ([]string, error)
+
+	// Transaction
+	SetTx(tx *models.Transaction, txn *gorm.DB) error
+	GetTxByHash(txHash []byte, txn *gorm.DB) (*models.Transaction, error)
+	GetTxsByBlockNumber(blockNumber uint64, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
+	GetTxsByInputAddress(address string, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
+	GetTxsByOutputAddress(address string, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
+	GetTxsByAnyAddress(address string, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
+	SetTxs(txs []*models.Transaction, txn *gorm.DB) error
+	GetTxs(limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
+	CountTxs(txn *gorm.DB) (int64, error)
+	DeleteTxByHash(txHash []byte, txn *gorm.DB) error
+	DeleteTxsByBlockNumber(blockNumber uint64, txn *gorm.DB) error
+	GetDatumByHash([]byte, *gorm.DB) (*models.Datum, error)
+	GetSimpleUTxOByPrimaryKey(uint, *gorm.DB) (*models.SimpleUTxO, error)
+	// GetTxInputByUTxO([]byte, uint32, *gorm.DB) (*models.TransactionInput, error)
+	// GetTxOutputByID(uint, *gorm.DB) (*models.TransactionOutput, error)
+	// GetTxOutputByUTxO([]byte, uint32, *gorm.DB) (*models.TransactionOutput, error)
+	GetWitnessByID(uint, *gorm.DB) (*models.Witness, error)
+	GetTxByID(uint, *gorm.DB) (*models.Transaction, error)
 }
 
 // For now, this always returns a sqlite plugin

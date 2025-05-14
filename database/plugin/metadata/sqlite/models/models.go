@@ -41,4 +41,11 @@ var MigrateModels = []any{
 	&VoteDelegation{},
 	&VoteRegistrationDelegation{},
 	&Address{},
+	&Transaction{},
+	&TransactionInput{},
+	&TransactionOutput{},
+	&Asset{},
+	&Datum{},
+	&Redeemer{},
+	&Witness{},
 }

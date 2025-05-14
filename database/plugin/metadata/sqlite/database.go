@@ -51,6 +51,7 @@ type MetadataStoreSqlite struct {
 	db          *gorm.DB
 	logger      *slog.Logger
 	timerVacuum *time.Timer
+
 }
 
 // New creates a new database
@@ -218,29 +219,4 @@ func (d *MetadataStoreSqlite) Where(
 	args ...interface{},
 ) *gorm.DB {
 	return d.DB().Where(query, args...)
-}
-
-// AddAddress adds a new address to the database
-func (d *MetadataStoreSqlite) AddAddress(address string, txn *gorm.DB) error {
-	newAddress := models.Address{
-		Address: address,
-	}
-	result := txn.Create(&newAddress)
-	if result.Error != nil {
-		return result.Error
-	}
-	return nil
-}
-
-// GetAddress returns the address from the database
-func (d *MetadataStoreSqlite) GetAddress(address string, txn *gorm.DB) (string, error) {
-	var addr models.Address
-	result := txn.Where("address = ?", address).First(&addr)
-	if result.Error != nil {
-		return "", result.Error
-	}
-	if result.RowsAffected == 0 {
-		return "", gorm.ErrRecordNotFound
-	}
-	return addr.Address, nil
 }

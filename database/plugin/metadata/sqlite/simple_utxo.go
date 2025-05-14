@@ -1,0 +1,74 @@
+package sqlite
+
+import (
+	"errors"
+
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
+	"gorm.io/gorm"
+)
+
+// SetSimpleUTxO stores or updates a SimpleUTxO struct.
+func (d *MetadataStoreSqlite) SetSimpleUTxO(utxo *models.SimpleUTxO, txn *gorm.DB) error {
+	if utxo == nil {
+		return errors.New("simple utxo cannot be nil")
+	}
+	// Basic validation
+	if len(utxo.TransactionHash) == 0 {
+		return errors.New("transaction hash cannot be empty")
+	}
+	if len(utxo.UTxOID) == 0 {
+		return errors.New("utxo id cannot be empty")
+	}
+	// UTxOIDIndex can be 0, so no validation needed
+
+	result := txn.Save(utxo) // Save will create or update based on primary key
+	return result.Error
+}
+
+// GetSimpleUTxOByUTxO retrieves a SimpleUTxO struct by its UTxOID and UTxOIDIndex.
+func (d *MetadataStoreSqlite) GetSimpleUTxOByUTxO(utxoID []byte, utxoIndex uint32, txn *gorm.DB) (*models.SimpleUTxO, error) {
+	var utxo models.SimpleUTxO
+	result := txn.Where("utxo_id = ? AND utxo_index = ?", utxoID, utxoIndex).First(&utxo)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // Return nil SimpleUTxO and nil error if not found
+		}
+		return nil, result.Error // Return other errors
+	}
+	return &utxo, nil
+}
+
+// GetSimpleUTxOByID retrieves SimpleUTxOs struct by its ID.
+// NOTE: This function retrieves by UTxOID, not the primary key ID.
+func (d *MetadataStoreSqlite) GetSimpleUTxOByID(utxoID []byte, txn *gorm.DB) ([]models.SimpleUTxO, error) {
+	var utxos []models.SimpleUTxO
+	result := txn.Where("utxo_id = ?", utxoID).Find(&utxos)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return utxos, nil
+}
+
+// GetSimpleUTxOByPrimaryKey retrieves a SimpleUTxO struct by its primary key ID.
+func (d *MetadataStoreSqlite) GetSimpleUTxOByPrimaryKey(id uint, txn *gorm.DB) (*models.SimpleUTxO, error) {
+	var utxo models.SimpleUTxO
+	result := txn.First(&utxo, id) // Find by primary key
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return nil, nil // Return nil SimpleUTxO and nil error if not found
+		}
+		return nil, result.Error // Return other errors
+	}
+	return &utxo, nil
+}
+
+
+// GetSimpleUTxOsByTransactionHash retrieves all SimpleUTxO structs for a given transaction hash.
+func (d *MetadataStoreSqlite) GetSimpleUTxOsByTransactionHash(transactionHash []byte, txn *gorm.DB) ([]models.SimpleUTxO, error) {
+	var utxos []models.SimpleUTxO
+	result := txn.Where("transaction_hash = ?", transactionHash).Find(&utxos)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return utxos, nil
+}

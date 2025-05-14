@@ -9,6 +9,7 @@ import (
 	"github.com/Andamio-Platform/andamio-indexer/config"
 	"github.com/Andamio-Platform/andamio-indexer/database"
 	"github.com/Andamio-Platform/andamio-indexer/router"
+	"github.com/Andamio-Platform/andamio-indexer/indexer"
 )
 
 var cmdlineFlags struct {
@@ -57,7 +58,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err := InitAdder(); err != nil {
+	database.SetGlobalDB(db)
+
+	if err := indexer.InitAdder(); err != nil {
 		fmt.Printf("Failed to init adder: %s\n", err)
 		os.Exit(1)
 	}

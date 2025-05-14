@@ -19,8 +19,10 @@ import (
 	"math/big"
 	"slices"
 
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models" // Import models package
 	"github.com/blinklabs-io/gouroboros/ledger"
 	"github.com/dgraph-io/badger/v4"
+	"gorm.io/gorm" // Import gorm for error checking
 )
 
 type Utxo struct {
@@ -31,7 +33,7 @@ type Utxo struct {
 	DeletedSlot uint64 `gorm:"index"`
 	PaymentKey  []byte `gorm:"index"`
 	StakingKey  []byte `gorm:"index"`
-	Cbor        []byte `gorm:"-"` // This is not represented in the metadata DB
+	Cbor        []byte `gorm:"-" json:"cbor"`
 }
 
 func (u *Utxo) TableName() string {
@@ -95,11 +97,27 @@ func (d *Database) UtxoByRef(
 		txn = d.Transaction(false)
 		defer txn.Commit() //nolint:errcheck
 	}
-	utxo, err := d.metadata.GetUtxo(txId, outputIdx, txn.Metadata())
-	if err != nil {
-		return tmpUtxo, err
+	// Fetch the models.Utxo with preloaded assets
+	var utxo models.Utxo
+	result := txn.Metadata().Preload("UtxoAssets.Asset").Where("tx_id = ? AND output_idx = ?", txId, outputIdx).First(&utxo)
+	if result.Error != nil {
+		if result.Error == gorm.ErrRecordNotFound {
+			return tmpUtxo, errors.New("utxo not found") // Or return a specific not found error
+		}
+		return tmpUtxo, result.Error
 	}
-	tmpUtxo = Utxo(utxo)
+
+	// Manually copy fields from models.Utxo to database.Utxo
+	tmpUtxo = Utxo{
+		ID:          utxo.ID,
+		TxId:        utxo.TxId,
+		OutputIdx:   utxo.OutputIdx,
+		AddedSlot:   utxo.AddedSlot,
+		DeletedSlot: utxo.DeletedSlot,
+		PaymentKey:  utxo.PaymentKey,
+		StakingKey:  utxo.StakingKey,
+	}
+
 	if err := tmpUtxo.loadCbor(txn); err != nil {
 		return tmpUtxo, err
 	}
@@ -122,20 +140,29 @@ func (d *Database) UtxosByAddress(
 	addr ledger.Address,
 	txn *Txn,
 ) ([]Utxo, error) {
-	ret := []Utxo{}
+	var ret []Utxo
 	if txn == nil {
 		txn = d.Transaction(false)
 		defer txn.Commit() //nolint:errcheck
 	}
-	utxos, err := d.metadata.GetUtxosByAddress(addr, txn.Metadata())
+	// Fetch models.Utxo with preloaded assets
+	utxos, err := d.metadata.GetUtxosByAddress(addr, txn.Metadata().Preload("UtxoAssets.Asset")) // Preload UtxoAssets and nested Asset
 	if err != nil {
 		return ret, err
 	}
-	var tmpUtxo Utxo
 	for _, utxo := range utxos {
-		tmpUtxo = Utxo(utxo)
+		tmpUtxo := Utxo{ // Manually copy fields
+			ID:          utxo.ID,
+			TxId:        utxo.TxId,
+			OutputIdx:   utxo.OutputIdx,
+			AddedSlot:   utxo.AddedSlot,
+			DeletedSlot: utxo.DeletedSlot,
+			PaymentKey:  utxo.PaymentKey,
+			StakingKey:  utxo.StakingKey,
+			// Cbor is loaded separately
+		}
 		if err := tmpUtxo.loadCbor(txn); err != nil {
-			return ret, err
+			return nil, err
 		}
 		ret = append(ret, tmpUtxo)
 	}

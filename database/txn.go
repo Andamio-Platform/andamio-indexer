@@ -155,6 +155,7 @@ func (t *Txn) GetUTxOsByAddress(address string) ([]*Utxo, error) {
 			DeletedSlot: utxo.DeletedSlot,
 			PaymentKey:  utxo.PaymentKey,
 			StakingKey:  utxo.StakingKey,
+			Cbor:        utxo.Cbor,
 		})
 	}
 

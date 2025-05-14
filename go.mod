@@ -6,8 +6,7 @@ toolchain go1.23.8
 
 require (
 	github.com/Salvionied/apollo v1.1.1
-	github.com/blinklabs-io/adder v0.28.0
-	github.com/blinklabs-io/gouroboros v0.116.0
+	github.com/blinklabs-io/gouroboros v0.120.0
 	github.com/dgraph-io/badger/v4 v4.7.0
 	github.com/glebarez/sqlite v1.11.0
 	github.com/gofiber/fiber/v2 v2.52.6
@@ -17,10 +16,12 @@ require (
 	gorm.io/plugin/opentelemetry v0.1.12
 )
 
+require github.com/blinklabs-io/adder v0.29.0
+
 require (
 	filippo.io/edwards25519 v1.1.0 // indirect
 	github.com/SundaeSwap-finance/kugo v1.1.0 // indirect
-	github.com/SundaeSwap-finance/ogmigo v0.9.0 // indirect
+	github.com/SundaeSwap-finance/ogmigo v0.10.0 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/aws/aws-sdk-go v1.55.6 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect

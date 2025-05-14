@@ -18,8 +18,7 @@ import (
 	"errors"
 	"io"
 	"log/slog"
-
-	"github.com/blinklabs-io/gouroboros/ledger"
+	"sync"
 
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/blob"
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata"
@@ -32,6 +31,11 @@ type Database struct {
 	metadata metadata.MetadataStore
 	dataDir  string
 }
+
+var (
+	globalDB *Database
+	globalMu sync.RWMutex
+)
 
 // Blob returns the underling blob store instance
 func (d *Database) Blob() blob.BlobStore {
@@ -80,41 +84,6 @@ func (d *Database) Close() error {
 	return err
 }
 
-// GetUTxOsByAddress returns the UTxOs for a given address
-func (d *Database) GetUTxOsByAddress(address string) ([]*Utxo, error) {
-	txn := d.Transaction(false)
-	defer txn.Discard()
-
-	// Convert address string to ledger.Address
-	// TODO: implement proper address decoding
-	paymentKeyHash := ledger.NewBlake2b224([]byte(address))
-	addrStr := string(paymentKeyHash.Bytes())
-	addr, err := ledger.NewAddress(addrStr)
-	if err != nil {
-		return nil, err
-	}
-
-	utxos, err := d.metadata.GetUtxosByAddress(addr, txn.Metadata())
-	if err != nil {
-		return nil, err
-	}
-
-	ret := []*Utxo{}
-	for _, utxo := range utxos {
-		ret = append(ret, &Utxo{
-			ID:          utxo.ID,
-			TxId:        utxo.TxId,
-			OutputIdx:   utxo.OutputIdx,
-			AddedSlot:   utxo.AddedSlot,
-			DeletedSlot: utxo.DeletedSlot,
-			PaymentKey:  utxo.PaymentKey,
-			StakingKey:  utxo.StakingKey,
-		})
-	}
-
-	return ret, nil
-}
-
 func (d *Database) init() error {
 	if d.logger == nil {
 		// Create logger to throw away logs
@@ -152,4 +121,18 @@ func New(
 		return db, err
 	}
 	return db, nil
+}
+
+// SetGlobalDB sets the global database instance
+func SetGlobalDB(db *Database) {
+	globalMu.Lock()
+	defer globalMu.Unlock()
+	globalDB = db
+}
+
+// GetGlobalDB returns the global database instance
+func GetGlobalDB() *Database {
+	globalMu.RLock()
+	defer globalMu.RUnlock()
+	return globalDB
 }

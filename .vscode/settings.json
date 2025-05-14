@@ -1,3 +1,15 @@
 {
-    "cSpell.words": ["blinklabs", "chainsync", "gofiber", "Prefork", "viewmodel"]
+    "cSpell.words": [
+        "blinklabs",
+        "chainsyc",
+        "chainsync",
+        "gofiber",
+        "gorm",
+        "gouroboros",
+        "KUPO",
+        "lcommon",
+        "ochainsync",
+        "Prefork",
+        "viewmodel"
+    ]
 }

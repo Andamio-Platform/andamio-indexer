@@ -77,3 +77,31 @@ func Load(configFile string) error {
 func GetGlobalConfig() *Config {
 	return GlobalConfig
 }
+
+func (a *Andamio) GetAllAndamioPolicies() []string {
+	var andamioPolicies []string
+	andamioPolicies = append(andamioPolicies, a.GlobalStateRefMS.MSCPolicyID)
+	andamioPolicies = append(andamioPolicies, a.IndexMS.MSCPolicyID)
+	andamioPolicies = append(andamioPolicies, a.InstanceMS.MSCPolicyID)
+	andamioPolicies = append(andamioPolicies, a.IndexRefMS.MSCPolicyID)
+	andamioPolicies = append(andamioPolicies, a.InstanceProvidedMS.MSCPolicyID)
+	return andamioPolicies
+}
+
+func (a *Andamio) GetAllAndamioAssetFingerprints() []string {
+	var assetsFingersList []string
+	assetsFingersList = append(assetsFingersList, a.GlobalAdmin)
+	assetsFingersList = append(assetsFingersList, a.IndexAdmin)
+	assetsFingersList = append(assetsFingersList, a.InstanceAdmin)
+	assetsFingersList = append(assetsFingersList, a.InstanceProviderAdmin)
+	assetsFingersList = append(assetsFingersList, a.StakingAdmin)
+
+	return assetsFingersList
+}
+
+func (a *Andamio) GetAllAndamioAddresses() []string {
+	var andamioAddr []string
+	andamioAddr = append(andamioAddr, a.GlobalStateRefMS.MSCPolicyID)
+
+	return andamioAddr
+}

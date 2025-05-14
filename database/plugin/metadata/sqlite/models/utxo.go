@@ -22,7 +22,7 @@ type Utxo struct {
 	DeletedSlot uint64 `gorm:"index"`
 	PaymentKey  []byte `gorm:"index"`
 	StakingKey  []byte `gorm:"index"`
-	Cbor        []byte `gorm:"-"` // This is here for convenience but not represented in the metadata DB
+	Cbor        []byte `gorm:"-" json:"cbor"` // This is here for convenience but not represented in the metadata DB
 }
 
 func (u *Utxo) TableName() string {
