@@ -19,9 +19,6 @@ import (
 
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite"
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
-	"github.com/blinklabs-io/gouroboros/ledger"
-	lcommon "github.com/blinklabs-io/gouroboros/ledger/common"
-	ochainsync "github.com/blinklabs-io/gouroboros/protocol/chainsync"
 	"gorm.io/gorm"
 )
 
@@ -29,135 +26,62 @@ type MetadataStore interface {
 	// Database
 	Close() error
 	DB() *gorm.DB
-	GetCommitTimestamp() (int64, error)
+	GetCommitTimestamp(txn *gorm.DB) (int64, error)
 	SetCommitTimestamp(*gorm.DB, int64) error
 	Transaction() *gorm.DB
 
-	// Ledger state
-	GetPoolRegistrations(
-		lcommon.PoolKeyHash,
-		*gorm.DB,
-	) ([]lcommon.PoolRegistrationCertificate, error)
-	GetStakeRegistrations(
-		[]byte, // stakeKey
-		*gorm.DB,
-	) ([]lcommon.StakeRegistrationCertificate, error)
-	GetTip(*gorm.DB) (ochainsync.Tip, error)
-
-	GetPParams(
-		uint64, // epoch
-		*gorm.DB,
-	) ([]models.PParams, error)
-	GetPParamUpdates(
-		uint64, // epoch
-		*gorm.DB,
-	) ([]models.PParamUpdate, error)
-	GetUtxo(
-		[]byte, // txId
-		uint32, // idx
-		*gorm.DB,
-	) (models.Utxo, error)
-
-	SetEpoch(
-		uint64, // slot
-		uint64, // epoch
-		[]byte, // nonce
-		uint, // era
-		uint, // slotLength
-		uint, // lengthInSlots
-		*gorm.DB,
-	) error
-	SetPoolRegistration(
-		*lcommon.PoolRegistrationCertificate,
-		uint64, // slot
-		uint64, // deposit
-		*gorm.DB,
-	) error
-	SetPoolRetirement(
-		*lcommon.PoolRetirementCertificate,
-		uint64, // slot
-		*gorm.DB,
-	) error
-	SetPParams(
-		[]byte, // pparams
-		uint64, // slot
-		uint64, // epoch
-		uint, // era
-		*gorm.DB,
-	) error
-	SetPParamUpdate(
-		[]byte, // genesis
-		[]byte, // update
-		uint64, // slot
-		uint64, // epoch
-		*gorm.DB,
-	) error
-	SetStakeDelegation(
-		*lcommon.StakeDelegationCertificate,
-		uint64, // slot
-		*gorm.DB,
-	) error
-	SetStakeDeregistration(
-		*lcommon.StakeDeregistrationCertificate,
-		uint64, // slot
-		*gorm.DB,
-	) error
-	SetStakeRegistration(
-		*lcommon.StakeRegistrationCertificate,
-		uint64, // slot
-		uint64, // deposit
-		*gorm.DB,
-	) error
-	SetTip(
-		ochainsync.Tip,
-		*gorm.DB,
-	) error
-	SetUtxo(
-		[]byte, // hash
-		uint32, // idx
-		uint64, // slot
-		[]byte, // payment
-		[]byte, // stake
-		*gorm.DB,
-	) error
-
-	// Helpers
-	DeleteUtxo(any, *gorm.DB) error
-	DeleteUtxos([]any, *gorm.DB) error
-	DeleteUtxosAfterSlot(uint64, *gorm.DB) error
-	DeleteUtxosBeforeSlot(uint64, *gorm.DB) error
-	GetEpochLatest(*gorm.DB) (models.Epoch, error)
-	GetEpochsByEra(uint, *gorm.DB) ([]models.Epoch, error)
-	GetUtxosAddedAfterSlot(uint64, *gorm.DB) ([]models.Utxo, error)
-	GetUtxosByAddress(ledger.Address, *gorm.DB) ([]models.Utxo, error)
-	GetUtxosDeletedBeforeSlot(uint64, *gorm.DB) ([]models.Utxo, error)
-	SetUtxoDeletedAtSlot(ledger.TransactionInput, uint64, *gorm.DB) error
-	SetUtxosNotDeletedAfterSlot(uint64, *gorm.DB) error
-
 	// Address
-	AddAddress(address string, txn *gorm.DB) error
-	GetAddress(address string, txn *gorm.DB) (string, error)
+	AddAddress(txn *gorm.DB, address string) error
+	GetAddress(txn *gorm.DB, address string) (string, error)
 	GetAllAddresses(txn *gorm.DB) ([]string, error)
 
 	// Transaction
-	SetTx(tx *models.Transaction, txn *gorm.DB) error
-	GetTxByHash(txHash []byte, txn *gorm.DB) (*models.Transaction, error)
-	GetTxsByBlockNumber(blockNumber uint64, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
-	GetTxsByInputAddress(address string, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
-	GetTxsByOutputAddress(address string, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
-	GetTxsByAnyAddress(address string, limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
-	SetTxs(txs []*models.Transaction, txn *gorm.DB) error
-	GetTxs(limit, offset int, txn *gorm.DB) ([]models.Transaction, error)
+	SetTx(txn *gorm.DB, tx *models.Transaction) error
+	GetTxByHash(txn *gorm.DB, txHash []byte) (*models.Transaction, error)
+	GetTxsByBlockNumber(txn *gorm.DB, blockNumber uint64, limit, offset int) ([]models.Transaction, error)
+	GetTxsByInputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
+	GetTxsByOutputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
+	GetTxsByAnyAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
+	SetTxs(txn *gorm.DB, txs []*models.Transaction) error
+	GetTxs(txn *gorm.DB, limit, offset int) ([]models.Transaction, error)
 	CountTxs(txn *gorm.DB) (int64, error)
-	DeleteTxByHash(txHash []byte, txn *gorm.DB) error
-	DeleteTxsByBlockNumber(blockNumber uint64, txn *gorm.DB) error
-	GetDatumByHash([]byte, *gorm.DB) (*models.Datum, error)
-	GetSimpleUTxOByPrimaryKey(uint, *gorm.DB) (*models.SimpleUTxO, error)
-	// GetTxInputByUTxO([]byte, uint32, *gorm.DB) (*models.TransactionInput, error)
-	// GetTxOutputByID(uint, *gorm.DB) (*models.TransactionOutput, error)
-	// GetTxOutputByUTxO([]byte, uint32, *gorm.DB) (*models.TransactionOutput, error)
-	GetWitnessByID(uint, *gorm.DB) (*models.Witness, error)
-	GetTxByID(uint, *gorm.DB) (*models.Transaction, error)
+	DeleteTxByHash(txn *gorm.DB, txHash []byte) error
+	DeleteTxsByBlockNumber(txn *gorm.DB, blockNumber uint64) error
+	GetTxInputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionInput, error)
+	GetTxOutputByID(txn *gorm.DB, arg1 uint) (*models.TransactionOutput, error)
+	GetTxOutputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionOutput, error)
+	GetTxByID(txn *gorm.DB, arg1 uint) (*models.Transaction, error)
+
+	// Added Getters and Setters for other types
+	GetAssets(txn *gorm.DB, utxoID []byte, utxoIndex uint32) ([]models.Asset, error)
+	SetAsset(txn *gorm.DB, asset *models.Asset) error
+
+	GetDatum(txn *gorm.DB, utxoID []byte, utxoIndex uint32) (*models.Datum, error)
+	GetDatumByHash(txn *gorm.DB, arg1 []byte) (*models.Datum, error)
+	SetDatum(txn *gorm.DB, datum *models.Datum) error
+
+	SetRedeemer(txn *gorm.DB, redeemer *models.Redeemer) error
+	GetRedeemersByWitnessId(txn *gorm.DB, witnessID uint) ([]models.Redeemer, error)
+	GetRedeemersByWitnessIdAndIndexAndTag(txn *gorm.DB, witnessID uint, index uint, tag []byte) (*models.Redeemer, error)
+	GetRedeemersByWitnessIdAndTag(txn *gorm.DB, witnessID uint, tag []byte) ([]models.Redeemer, error)
+
+	SetSimpleUTxO(txn *gorm.DB, utxo *models.SimpleUTxO) error
+	GetSimpleUTxOByUTxO(txn *gorm.DB, utxoID []byte, utxoIndex uint32) (*models.SimpleUTxO, error)
+	GetSimpleUTxOByID(txn *gorm.DB, arg1 []byte) ([]models.SimpleUTxO, error)
+	GetSimpleUTxOsByTransactionHash(txn *gorm.DB, transactionHash []byte) ([]models.SimpleUTxO, error)
+	GetSimpleUTxOByPrimaryKey(txn *gorm.DB, arg1 uint) (*models.SimpleUTxO, error)
+
+	SetTransactionInput(txn *gorm.DB, input *models.TransactionInput) error
+	GetTransactionInputsByTransactionHash(txn *gorm.DB, transactionHash []byte) ([]models.TransactionInput, error)
+	GetTransactionInputsByAddress(txn *gorm.DB, address []byte) ([]models.TransactionInput, error)
+
+	SetTransactionOutput(txn *gorm.DB, output *models.TransactionOutput) error
+	GetTransactionOutputsByTransactionHash(txn *gorm.DB, transactionHash []byte) ([]models.TransactionOutput, error)
+	GetTransactionOutputsByAddress(txn *gorm.DB, address []byte) ([]models.TransactionOutput, error)
+
+	SetWitness(txn *gorm.DB, witness *models.Witness) error
+	GetWitnessByTransactionHash(txn *gorm.DB, transactionHash []byte) (*models.Witness, error)
+	GetWitnessByID(txn *gorm.DB, arg1 uint) (*models.Witness, error)
 }
 
 // For now, this always returns a sqlite plugin

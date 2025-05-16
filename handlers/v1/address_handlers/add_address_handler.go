@@ -44,7 +44,7 @@ func AddAddressHandler(db *database.Database, logger *slog.Logger) http.HandlerF
 			}
 		}()
 
-		err = db.Metadata().AddAddress(addressRequest.Address, txn)
+		err = db.Metadata().AddAddress(txn, addressRequest.Address)
 		if err != nil {
 			txn.Rollback()
 			logger.Error("failed to add address to database", "error", err)

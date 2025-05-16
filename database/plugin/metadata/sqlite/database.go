@@ -174,8 +174,12 @@ func (d *MetadataStoreSqlite) scheduleDailyVacuum() {
 }
 
 // AutoMigrate wraps the gorm AutoMigrate
-func (d *MetadataStoreSqlite) AutoMigrate(dst ...interface{}) error {
-	return d.DB().AutoMigrate(dst...)
+func (d *MetadataStoreSqlite) AutoMigrate(txn *gorm.DB, dst ...interface{}) error {
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
+	return db.AutoMigrate(dst...)
 }
 
 // Close gets the database handle from our MetadataStore and closes it
@@ -189,8 +193,12 @@ func (d *MetadataStoreSqlite) Close() error {
 }
 
 // Create creates a record
-func (d *MetadataStoreSqlite) Create(value interface{}) *gorm.DB {
-	return d.DB().Create(value)
+func (d *MetadataStoreSqlite) Create(txn *gorm.DB, value interface{}) *gorm.DB {
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
+	return db.Create(value)
 }
 
 // DB returns the database handle
@@ -199,13 +207,21 @@ func (d *MetadataStoreSqlite) DB() *gorm.DB {
 }
 
 // First returns the first DB entry
-func (d *MetadataStoreSqlite) First(args interface{}) *gorm.DB {
-	return d.DB().First(args)
+func (d *MetadataStoreSqlite) First(txn *gorm.DB, args interface{}) *gorm.DB {
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
+	return db.First(args)
 }
 
 // Order orders a DB query
-func (d *MetadataStoreSqlite) Order(args interface{}) *gorm.DB {
-	return d.DB().Order(args)
+func (d *MetadataStoreSqlite) Order(txn *gorm.DB, args interface{}) *gorm.DB {
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
+	return db.Order(args)
 }
 
 // Transaction creates a gorm transaction
@@ -215,8 +231,13 @@ func (d *MetadataStoreSqlite) Transaction() *gorm.DB {
 
 // Where constrains a DB query
 func (d *MetadataStoreSqlite) Where(
+	txn *gorm.DB,
 	query interface{},
 	args ...interface{},
 ) *gorm.DB {
-	return d.DB().Where(query, args...)
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
+	return db.Where(query, args...)
 }

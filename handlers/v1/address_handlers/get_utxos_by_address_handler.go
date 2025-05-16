@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 
 	database "github.com/Andamio-Platform/andamio-indexer/database"
-	ledger "github.com/blinklabs-io/gouroboros/ledger"
 	"github.com/gofiber/fiber/v2"
 	fiberLogger "github.com/gofiber/fiber/v2/log"
 )
@@ -42,13 +41,8 @@ func GetUTxOsByAddressHandler(c *fiber.Ctx, db *database.Database) error {
 	globalDB := database.GetGlobalDB()
 	txn := globalDB.Transaction(true)
 	defer txn.Discard()
-	ledgerAddress, err := ledger.NewAddress(address)
-	if err != nil {
-		fiberLogger.Error(err)
-		return fiber.NewError(fiber.StatusBadRequest, err.Error())
-	}
 
-	utxos, err := database.GetGlobalDB().UtxosByAddress(ledgerAddress, txn)
+	utxos, err := database.GetGlobalDB().GetTxsByAnyAddress(address, 20, 1, txn)
 	if err != nil {
 		fiberLogger.Errorf("Failed to get UTxOs for address %s: %v", address, err)
 		return fiber.NewError(fiber.StatusInternalServerError, "failed to get UTxOs")

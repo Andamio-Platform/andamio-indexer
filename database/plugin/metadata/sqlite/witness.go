@@ -8,7 +8,11 @@ import (
 )
 
 // SetWitness stores or updates a Witness struct.
-func (d *MetadataStoreSqlite) SetWitness(witness *models.Witness, txn *gorm.DB) error {
+func (d *MetadataStoreSqlite) SetWitness(txn *gorm.DB, witness *models.Witness) error {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	if witness == nil {
 		return errors.New("witness cannot be nil")
 	}
@@ -18,14 +22,18 @@ func (d *MetadataStoreSqlite) SetWitness(witness *models.Witness, txn *gorm.DB) 
 	// Basic validation for nested Redeemers could be added here if needed,
 	// but the SetRedeemer function should handle individual redeemer validation.
 
-	result := txn.Save(witness) // Save will create or update based on primary key
+	result := db.Save(witness) // Save will create or update based on primary key
 	return result.Error
 }
 
 // GetWitnessByTransactionHash retrieves a Witness struct by its transaction hash.
-func (d *MetadataStoreSqlite) GetWitnessByTransactionHash(transactionHash []byte, txn *gorm.DB) (*models.Witness, error) {
+func (d *MetadataStoreSqlite) GetWitnessByTransactionHash(txn *gorm.DB, transactionHash []byte) (*models.Witness, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	var witness models.Witness
-	result := txn.Where("transaction_hash = ?", transactionHash).First(&witness)
+	result := db.Where("transaction_hash = ?", transactionHash).First(&witness)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil // Return nil Witness and nil error if not found
@@ -36,9 +44,13 @@ func (d *MetadataStoreSqlite) GetWitnessByTransactionHash(transactionHash []byte
 }
 
 // GetWitnessByID retrieves a Witness struct by its primary key ID.
-func (d *MetadataStoreSqlite) GetWitnessByID(id uint, txn *gorm.DB) (*models.Witness, error) {
+func (d *MetadataStoreSqlite) GetWitnessByID(txn *gorm.DB, id uint) (*models.Witness, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	var witness models.Witness
-	result := txn.First(&witness, id) // Find by primary key
+	result := db.First(&witness, id) // Find by primary key
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil // Return nil Witness and nil error if not found

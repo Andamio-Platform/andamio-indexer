@@ -82,7 +82,7 @@ func (a *Andamio) GetAllAndamioPolicies() []string {
 	var andamioPolicies []string
 	andamioPolicies = append(andamioPolicies, a.GlobalStateRefMS.MSCPolicyID)
 	andamioPolicies = append(andamioPolicies, a.IndexMS.MSCPolicyID)
-	andamioPolicies = append(andamioPolicies, a.InstanceMS.MSCPolicyID)
+	andamioPolicies = append(andamioPolicies, a.InstanceMS.MSCPolicyID) // every utxo with this token is trusted
 	andamioPolicies = append(andamioPolicies, a.IndexRefMS.MSCPolicyID)
 	andamioPolicies = append(andamioPolicies, a.InstanceProvidedMS.MSCPolicyID)
 	return andamioPolicies
@@ -101,7 +101,14 @@ func (a *Andamio) GetAllAndamioAssetFingerprints() []string {
 
 func (a *Andamio) GetAllAndamioAddresses() []string {
 	var andamioAddr []string
-	andamioAddr = append(andamioAddr, a.GlobalStateRefMS.MSCPolicyID)
+	andamioAddr = append(andamioAddr, a.GlobalStateRefMS.MSCAddress)
+	andamioAddr = append(andamioAddr, a.GlobalStateS.SCAddress)
+	andamioAddr = append(andamioAddr, a.GovernanceS.SCAddress)
+	andamioAddr = append(andamioAddr, a.IndexMS.MSCAddress)
+	andamioAddr = append(andamioAddr, a.IndexRefMS.MSCAddress)
+	andamioAddr = append(andamioAddr, a.InstanceMS.MSCAddress) // all instance vlidator at this address
+	andamioAddr = append(andamioAddr, a.InstanceProvidedMS.MSCAddress)
+	andamioAddr = append(andamioAddr, a.ReferenceAddr)
 
 	return andamioAddr
 }

@@ -35,7 +35,7 @@ func (e CommitTimestampError) Error() string {
 
 func (b *Database) checkCommitTimestamp() error {
 	// Get value from metadata
-	metadataTimestamp, metadataErr := b.Metadata().GetCommitTimestamp()
+	metadataTimestamp, metadataErr := b.Metadata().GetCommitTimestamp(nil)
 	if metadataErr != nil {
 		return fmt.Errorf(
 			"failed to get metadata timestamp from plugin: %w",

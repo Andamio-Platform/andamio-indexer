@@ -13,14 +13,14 @@ type Transaction struct {
 	SlotNumber      uint64              `gorm:"index" json:"slot_number"`
 	TransactionHash []byte              `gorm:"index" json:"transaction_hash"`
 	Inputs          []TransactionInput  `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"inputs"`
-	Outputs         []TransactionOutput `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"outputs"` // Corrected foreign key to reference TransactionHash
+	Outputs         []TransactionOutput `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"outputs"`
 	ReferenceInputs []SimpleUTxO        `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"reference_inputs"`
-	Metadata        []byte              `gorm:"type:blob" json:"metadata"` // Removed index tag as it's not effective on blob types
+	Metadata        []byte              `gorm:"type:blob" json:"metadata"`
 	Fee             uint64              `gorm:"index" json:"fee"`
 	TTL             uint64              `gorm:"index" json:"ttl"`
-	Withdrawals     map[byte]uint64     `json:"withdrawals"` // Removed index tag as GORM does not support indexing map types
+	Withdrawals     map[string]uint64   `json:"withdrawals"`
 	Witness         Witness             `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"witness"`
-	Certificate     []byte              `gorm:"type:blob" json:"certificate"` // Removed index tag as it's not effective on blob types
+	Certificates    [][]byte            `gorm:"type:blob" json:"certificate"`
 }
 
 // TableName overrides the table name
@@ -133,12 +133,12 @@ func (t *Transaction) SetTTL(ttl uint64) {
 }
 
 // GetWithdrawals returns the Withdrawals of the Transaction.
-func (t *Transaction) GetWithdrawals() map[byte]uint64 {
+func (t *Transaction) GetWithdrawals() map[string]uint64 {
 	return t.Withdrawals
 }
 
 // SetWithdrawals sets the Withdrawals of the Transaction.
-func (t *Transaction) SetWithdrawals(withdrawals map[byte]uint64) {
+func (t *Transaction) SetWithdrawals(withdrawals map[string]uint64) {
 	t.Withdrawals = withdrawals
 }
 
@@ -153,11 +153,11 @@ func (t *Transaction) SetWitness(witness Witness) {
 }
 
 // GetCertificate returns the Certificate of the Transaction.
-func (t *Transaction) GetCertificate() []byte {
-	return t.Certificate
+func (t *Transaction) GetCertificate() [][]byte {
+	return t.Certificates
 }
 
 // SetCertificate sets the Certificate of the Transaction.
-func (t *Transaction) SetCertificate(certificate []byte) {
-	t.Certificate = certificate
+func (t *Transaction) SetCertificate(certificates [][]byte) {
+	t.Certificates = certificates
 }

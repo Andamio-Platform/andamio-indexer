@@ -6,11 +6,15 @@ import (
 )
 
 // AddAddress adds a new address to the database
-func (d *MetadataStoreSqlite) AddAddress(address string, txn *gorm.DB) error {
+func (d *MetadataStoreSqlite) AddAddress(txn *gorm.DB, address string) error {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	newAddress := models.Address{
 		Address: address,
 	}
-	result := txn.Create(&newAddress)
+	result := db.Create(&newAddress)
 	if result.Error != nil {
 		return result.Error
 	}
@@ -18,9 +22,13 @@ func (d *MetadataStoreSqlite) AddAddress(address string, txn *gorm.DB) error {
 }
 
 // GetAddress returns the address from eventCtx.TransactionHash the database
-func (d *MetadataStoreSqlite) GetAddress(address string, txn *gorm.DB) (string, error) {
+func (d *MetadataStoreSqlite) GetAddress(txn *gorm.DB, address string) (string, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	var addr models.Address
-	result := txn.Where("address = ?", address).First(&addr)
+	result := db.Where("address = ?", address).First(&addr)
 	if result.Error != nil {
 		return "", result.Error
 	}
@@ -33,8 +41,12 @@ func (d *MetadataStoreSqlite) GetAddress(address string, txn *gorm.DB) (string, 
 
 // GetAllAddresses returns all addresses from the database
 func (d *MetadataStoreSqlite) GetAllAddresses(txn *gorm.DB) ([]string, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	var addresses []models.Address
-	result := txn.Find(&addresses)
+	result := db.Find(&addresses)
 	if result.Error != nil {
 		return nil, result.Error
 	}

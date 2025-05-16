@@ -8,9 +8,13 @@ import (
 )
 
 // GetDatum retrieves a Datum by UTxOID and UTxOIDIndex.
-func (d *MetadataStoreSqlite) GetDatum(utxoID []byte, utxoIndex uint32, txn *gorm.DB) (*models.Datum, error) {
+func (d *MetadataStoreSqlite) GetDatum(txn *gorm.DB, utxoID []byte, utxoIndex uint32) (*models.Datum, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	var datum models.Datum
-	result := d.db.Where("utxo_id = ? AND utxo_index = ?", utxoID, utxoIndex).First(&datum)
+	result := db.Where("utxo_id = ? AND utxo_index = ?", utxoID, utxoIndex).First(&datum)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil // Return nil Datum and nil error if not found
@@ -21,9 +25,13 @@ func (d *MetadataStoreSqlite) GetDatum(utxoID []byte, utxoIndex uint32, txn *gor
 }
 
 // GetDatumByHash retrieves a Datum by its hash.
-func (d *MetadataStoreSqlite) GetDatumByHash(datumHash []byte, txn *gorm.DB) (*models.Datum, error) {
+func (d *MetadataStoreSqlite) GetDatumByHash(txn *gorm.DB, datumHash []byte) (*models.Datum, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	var datum models.Datum
-	result := d.db.Where("datum_hash = ?", datumHash).First(&datum)
+	result := db.Where("datum_hash = ?", datumHash).First(&datum)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil // Return nil Datum and nil error if not found
@@ -35,7 +43,11 @@ func (d *MetadataStoreSqlite) GetDatumByHash(datumHash []byte, txn *gorm.DB) (*m
 
 
 // SetDatum stores or updates a Datum.
-func (d *MetadataStoreSqlite) SetDatum(datum *models.Datum) error {
+func (d *MetadataStoreSqlite) SetDatum(txn *gorm.DB, datum *models.Datum) error {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
 	if datum == nil {
 		return errors.New("datum cannot be nil")
 	}
@@ -46,6 +58,6 @@ func (d *MetadataStoreSqlite) SetDatum(datum *models.Datum) error {
 		return errors.New("datum cbor cannot be empty")
 	}
 
-	result := d.db.Save(datum) // Save will create or update based on primary key
+	result := db.Save(datum) // Save will create or update based on primary key
 	return result.Error
 }

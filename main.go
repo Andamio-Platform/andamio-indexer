@@ -60,7 +60,7 @@ func main() {
 
 	database.SetGlobalDB(db)
 
-	if err := indexer.InitAdder(); err != nil {
+	if err := indexer.StartIndexer(); err != nil {
 		fmt.Printf("Failed to init adder: %s\n", err)
 		os.Exit(1)
 	}

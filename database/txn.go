@@ -19,7 +19,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/blinklabs-io/gouroboros/ledger"
 	"github.com/dgraph-io/badger/v4"
 	"gorm.io/gorm"
 )
@@ -129,37 +128,6 @@ func (t *Txn) Rollback() error {
 	t.lock.Lock()
 	defer t.lock.Unlock()
 	return t.rollback()
-}
-
-func (t *Txn) GetUTxOsByAddress(address string) ([]*Utxo, error) {
-	// Convert address string to ledger.Address
-	paymentKeyHash := ledger.NewBlake2b224([]byte(address))
-	addrStr := string(paymentKeyHash.Bytes())
-	addr, err := ledger.NewAddress(addrStr)
-	if err != nil {
-		return nil, err
-	}
-
-	utxos, err := t.db.metadata.GetUtxosByAddress(addr, t.metadataTxn)
-	if err != nil {
-		return nil, err
-	}
-
-	ret := []*Utxo{}
-	for _, utxo := range utxos {
-		ret = append(ret, &Utxo{
-			ID:          utxo.ID,
-			TxId:        utxo.TxId,
-			OutputIdx:   utxo.OutputIdx,
-			AddedSlot:   utxo.AddedSlot,
-			DeletedSlot: utxo.DeletedSlot,
-			PaymentKey:  utxo.PaymentKey,
-			StakingKey:  utxo.StakingKey,
-			Cbor:        utxo.Cbor,
-		})
-	}
-
-	return ret, nil
 }
 
 func (t *Txn) rollback() error {

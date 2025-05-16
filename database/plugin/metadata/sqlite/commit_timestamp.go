@@ -35,10 +35,14 @@ func (CommitTimestamp) TableName() string {
 	return "commit_timestamp"
 }
 
-func (d *MetadataStoreSqlite) GetCommitTimestamp() (int64, error) {
+func (d *MetadataStoreSqlite) GetCommitTimestamp(txn *gorm.DB) (int64, error) {
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
 	// Get value from sqlite
 	var tmpCommitTimestamp CommitTimestamp
-	result := d.DB().First(&tmpCommitTimestamp)
+	result := db.First(&tmpCommitTimestamp)
 	if result.Error != nil {
 		// It's not an error if there's no records found
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
