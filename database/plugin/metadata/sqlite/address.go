@@ -58,3 +58,56 @@ func (d *MetadataStoreSqlite) GetAllAddresses(txn *gorm.DB) ([]string, error) {
 
 	return addrList, nil
 }
+
+// GetTxInputsByAddress retrieves transaction inputs for a given address with pagination support.
+func (d *MetadataStoreSqlite) GetTxInputsByAddress(txn *gorm.DB, address string, limit, offset int) ([]models.TransactionInput, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
+	var inputs []models.TransactionInput
+	query := db.Where("address = ?", []byte(address))
+
+	if limit > 0 || offset >= 0 {
+		query = query.Limit(limit).Offset(offset)
+	}
+
+	result := query.Find(&inputs)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return inputs, nil
+}
+
+// GetTxOutputsByAddress retrieves transaction outputs for a given address with pagination support.
+func (d *MetadataStoreSqlite) GetTxOutputsByAddress(txn *gorm.DB, address string, limit, offset int) ([]models.TransactionOutput, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
+	var outputs []models.TransactionOutput
+	query := db.Where("address = ?", []byte(address))
+
+	if limit > 0 || offset >= 0 {
+		query = query.Limit(limit).Offset(offset)
+	}
+
+	result := query.Find(&outputs)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return outputs, nil
+}
+
+// RemoveAddress removes an address from the database
+func (d *MetadataStoreSqlite) RemoveAddress(txn *gorm.DB, address string) error {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
+	result := db.Where("address = ?", address).Delete(&models.Address{})
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
+}

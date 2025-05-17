@@ -46,7 +46,6 @@ func (d *MetadataStoreSqlite) SetTx(txn *gorm.DB, tx *models.Transaction) error 
 		}
 	}
 
-
 	return nil
 }
 
@@ -124,7 +123,7 @@ func (d *MetadataStoreSqlite) setWitness(txn *gorm.DB, witness models.Witness, t
 
 	// Save nested Redeemers
 	for _, redeemer := range witness.Redeemers {
-		redeemer.WitnessID = witness.ID // Set foreign key to Witness
+		redeemer.TransactionHash = witness.TransactionHash // Set foreign key to Witness's transaction hash
 		result := db.Save(&redeemer)
 		if result.Error != nil {
 			return result.Error
@@ -134,8 +133,8 @@ func (d *MetadataStoreSqlite) setWitness(txn *gorm.DB, witness models.Witness, t
 	return nil
 }
 
-// GetTxByHash retrieves a single transaction by its hash
-func (d *MetadataStoreSqlite) GetTxByHash(txn *gorm.DB, txHash []byte) (*models.Transaction, error) {
+// GetTxByTxHash retrieves a single transaction by its hash
+func (d *MetadataStoreSqlite) GetTxByTxHash(txn *gorm.DB, txHash []byte) (*models.Transaction, error) {
 	db := txn
 	if db == nil {
 		db = d.db
@@ -187,7 +186,6 @@ func (d *MetadataStoreSqlite) GetTxByID(txn *gorm.DB, id uint) (*models.Transact
 	}
 	return &transaction, nil
 }
-
 
 // GetTxsByBlockNumber retrieves all transactions for a given block number with pagination support
 func (d *MetadataStoreSqlite) GetTxsByBlockNumber(txn *gorm.DB, blockNumber uint64, limit, offset int) ([]models.Transaction, error) {

@@ -1,0 +1,1717 @@
+basePath: /api/v1/indexer
+definitions:
+  errors.ServerError:
+    properties:
+      error:
+        type: string
+      statusCode:
+        type: integer
+    type: object
+  viewmodel.AddressRequest:
+    properties:
+      address:
+        type: string
+    type: object
+  viewmodel.Asset:
+    properties:
+      amount:
+        type: integer
+      fingerprint:
+        type: string
+      name:
+        type: string
+      name_hex:
+        type: string
+      policy_id:
+        type: string
+      utxo_id:
+        type: string
+      utxo_index:
+        type: integer
+    type: object
+  viewmodel.Datum:
+    properties:
+      datum_cbor:
+        type: string
+      datum_hash:
+        type: string
+      utxo_id:
+        type: string
+      utxo_index:
+        type: integer
+    type: object
+  viewmodel.Redeemer:
+    properties:
+      cbor:
+        description: CBOR string representation
+        type: string
+      index:
+        type: integer
+      tag:
+        type: integer
+      transaction_hash:
+        type: string
+    type: object
+  viewmodel.SimpleUTxO:
+    properties:
+      transaction_hash:
+        type: string
+      utxo_id:
+        type: string
+      utxo_index:
+        type: integer
+    type: object
+  viewmodel.Transaction:
+    properties:
+      block_hash:
+        type: string
+      block_number:
+        type: integer
+      certificates:
+        description: Slice of CBOR string representations
+        items:
+          type: string
+        type: array
+      fee:
+        type: integer
+      inputs:
+        items:
+          $ref: '#/definitions/viewmodel.TransactionInput'
+        type: array
+      metadata:
+        description: CBOR string representation
+        type: string
+      outputs:
+        items:
+          $ref: '#/definitions/viewmodel.TransactionOutput'
+        type: array
+      reference_inputs:
+        items:
+          $ref: '#/definitions/viewmodel.SimpleUTxO'
+        type: array
+      slot_number:
+        type: integer
+      transaction_hash:
+        type: string
+      ttl:
+        type: integer
+      withdrawals:
+        additionalProperties:
+          type: integer
+        type: object
+      witness:
+        $ref: '#/definitions/viewmodel.Witness'
+    type: object
+  viewmodel.TransactionInput:
+    properties:
+      address:
+        type: string
+      amount:
+        type: integer
+      asset:
+        items:
+          $ref: '#/definitions/viewmodel.Asset'
+        type: array
+      cbor:
+        description: CBOR string representation
+        type: string
+      datum:
+        $ref: '#/definitions/viewmodel.Datum'
+      transaction_hash:
+        type: string
+      utxo_id:
+        type: string
+      utxo_index:
+        type: integer
+    type: object
+  viewmodel.TransactionOutput:
+    properties:
+      address:
+        type: string
+      amount:
+        type: integer
+      asset:
+        items:
+          $ref: '#/definitions/viewmodel.Asset'
+        type: array
+      cbor:
+        description: CBOR string representation
+        type: string
+      datum:
+        $ref: '#/definitions/viewmodel.Datum'
+      utxo_id:
+        type: string
+      utxo_index:
+        type: integer
+    type: object
+  viewmodel.TransactionUTxOs:
+    properties:
+      inputs:
+        items:
+          $ref: '#/definitions/viewmodel.TransactionInput'
+        type: array
+      outputs:
+        items:
+          $ref: '#/definitions/viewmodel.TransactionOutput'
+        type: array
+    type: object
+  viewmodel.Witness:
+    properties:
+      plutus_data:
+        description: Slice of CBOR string representations
+        items:
+          type: string
+        type: array
+      plutus_v1_scripts:
+        description: Slice of CBOR string representations
+        items:
+          type: string
+        type: array
+      plutus_v2_scripts:
+        description: Slice of CBOR string representations
+        items:
+          type: string
+        type: array
+      plutus_v3_scripts:
+        description: Slice of CBOR string representations
+        items:
+          type: string
+        type: array
+      redeemers:
+        items:
+          $ref: '#/definitions/viewmodel.Redeemer'
+        type: array
+      transaction_hash:
+        type: string
+    type: object
+externalDocs:
+  description: OpenAPI
+  url: https://swagger.io/resources/open-api/
+host: 0.0.0.0:42069
+info:
+  contact:
+    email: dev@andamio.io
+    name: Andamio Support
+    url: https://www.andamio.com/support
+  description: Indexer APIs for Andamio dapp-system.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Andamio Indexer 1.0.0
+  version: 1.0.0
+paths:
+  /addresses:
+    delete:
+      consumes:
+      - application/json
+      description: Removes an address from the tracking list.
+      operationId: removeAddress
+      parameters:
+      - description: The address object containing the address string to be removed.
+        in: body
+        name: addressRequest
+        required: true
+        schema:
+          $ref: '#/definitions/viewmodel.AddressRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully removed address.
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Invalid request body or missing address.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Remove Address
+      tags:
+      - Addresses
+    post:
+      consumes:
+      - application/json
+      description: Adds a new address to the indexer for monitoring transactions and
+        UTxOs.
+      operationId: addAddress
+      parameters:
+      - description: The address object containing the address string to be added.
+        in: body
+        name: address
+        required: true
+        schema:
+          $ref: '#/definitions/viewmodel.AddressRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Successfully added address.
+          schema:
+            properties:
+              message:
+                type: string
+            type: object
+        "400":
+          description: Invalid request body or missing address.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Add Address
+      tags:
+      - Addresses
+  /addresses/{address}/assets:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of assets held at a specific address, with support
+        for pagination.
+      operationId: getAssetsByAddress
+      parameters:
+      - description: The address to retrieve assets for.
+        in: path
+        name: address
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved assets.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Asset'
+            type: array
+        "400":
+          description: Invalid address or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Address not found or no assets found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Assets by Address
+      tags:
+      - Addresses
+  /addresses/{address}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transactions associated with a specific address with
+        pagination.
+      operationId: getTransactionsByAddress
+      parameters:
+      - description: The address to retrieve transactions for.
+        in: path
+        name: address
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid address or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Address not found or no transactions found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Address
+      tags:
+      - Addresses
+  /addresses/{address}/utxos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves UTxOs associated with a specific address with pagination.
+      operationId: getUTxOsByAddress
+      parameters:
+      - description: The address to retrieve UTxOs for.
+        in: path
+        name: address
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved UTxOs.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid address or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Address not found or no UTxOs found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get UTxOs by Address
+      tags:
+      - Addresses
+  /assets/{asset_fingerprint}/addresses:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of addresses that hold a specific asset fingerprint,
+        with support for pagination.
+      operationId: getAddressesByAssetFingerprint
+      parameters:
+      - description: The asset fingerprint (hex-encoded) to retrieve addresses for.
+        in: path
+        name: asset_fingerprint
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved addresses.
+          schema:
+            items:
+              type: string
+            type: array
+        "400":
+          description: Invalid asset fingerprint or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Asset fingerprint not found or no addresses found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Addresses by Asset Fingerprint
+      tags:
+      - Assets
+  /assets/{asset_fingerprint}/utxos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of UTxOs containing a specific asset fingerprint,
+        with support for pagination.
+      operationId: getUTxOsByAssetFingerprint
+      parameters:
+      - description: The asset fingerprint (hex-encoded) to retrieve UTxOs for.
+        in: path
+        name: asset_fingerprint
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved UTxOs.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.SimpleUTxO'
+            type: array
+        "400":
+          description: Invalid asset fingerprint or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Asset fingerprint not found or no UTxOs found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get UTxOs by Asset Fingerprint
+      tags:
+      - Assets
+  /datums/{datum_hash}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a specific datum by its hash.
+      operationId: getDatumByHash
+      parameters:
+      - description: The datum hash (hex-encoded) to retrieve.
+        in: path
+        name: datum_hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved datum.
+          schema:
+            $ref: '#/definitions/viewmodel.Datum'
+        "400":
+          description: Invalid datum hash.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Datum not found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Datum by Hash
+      tags:
+      - Datums
+  /datums/{datum_hash}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of transactions that reference a specific datum
+        hash.
+      operationId: getTransactionsByDatumHash
+      parameters:
+      - description: The datum hash (hex-encoded) to retrieve transactions for.
+        in: path
+        name: datum_hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid datum hash.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Datum hash not found or no transactions found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Datum Hash
+      tags:
+      - Datums
+  /indexer/addresses/{address}/utxos/inputs:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transaction inputs for a given address with pagination.
+      operationId: getUTxOsInputsByAddress
+      parameters:
+      - description: The address to retrieve UTXO inputs for.
+        in: path
+        name: address
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved UTXO inputs.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.TransactionInput'
+            type: array
+        "400":
+          description: Invalid address or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Address not found or no UTXO inputs found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get UTXO Inputs by Address
+      tags:
+      - Addresses
+  /indexer/addresses/{address}/utxos/outputs:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transaction outputs for a given address with pagination.
+      parameters:
+      - description: Address to retrieve UTXO outputs for
+        in: path
+        name: address
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.TransactionOutput'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errors.ServerError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/errors.ServerError'
+      summary: Get UTXO Outputs by Address
+      tags:
+      - Addresses
+  /indexer/assets/fingerprint/{asset_fingerprint}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a list of transactions associated with a specific asset
+        fingerprint, with support for pagination.
+      operationId: getTransactionsByAssetFingerprint
+      parameters:
+      - description: The asset fingerprint (hex-encoded) to retrieve transactions
+          for.
+        in: path
+        name: asset_fingerprint
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid asset fingerprint or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Asset fingerprint not found or no transactions found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Asset Fingerprint
+      tags:
+      - Assets
+  /indexer/assets/policy/{policyId}/token/{tokenname}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transactions associated with a given policy ID and token
+        name with pagination.
+      operationId: getTransactionsByPolicyIdAndTokenName
+      parameters:
+      - description: The policy ID to retrieve transactions for (hex-encoded).
+        in: path
+        name: policyId
+        required: true
+        type: string
+      - description: The token name to retrieve transactions for (hex-encoded).
+        in: path
+        name: tokenname
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid policy ID, token name, or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Policy ID and token name combination not found or no transactions
+            found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Policy ID and Token Name
+      tags:
+      - Assets
+  /indexer/assets/policy/{policyId}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transactions associated with a given policy ID with pagination.
+      operationId: getTransactionsByPolicyId
+      parameters:
+      - description: The policy ID to retrieve transactions for (hex-encoded).
+        in: path
+        name: policyId
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid policy ID or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Policy ID not found or no transactions found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Policy ID
+      tags:
+      - Assets
+  /indexer/assets/token/{tokenname}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transactions associated with a given token name with
+        pagination.
+      operationId: getTransactionsByTokenName
+      parameters:
+      - description: The token name to retrieve transactions for (hex-encoded).
+        in: path
+        name: tokenname
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid token name or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Token name not found or no transactions found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Token Name
+      tags:
+      - Assets
+  /indexer/transactions/{block_number}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transactions for a given block number with pagination.
+      operationId: getTransactionsByBlockNumber
+      parameters:
+      - description: The block number to retrieve transactions for.
+        in: path
+        name: block_number
+        required: true
+        type: integer
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid block number or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Block number not found or no transactions found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Block Number
+      tags:
+      - Transactions
+  /indexer/transactions/{tx_hash}/utxos/inputs:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transaction inputs for a given transaction hash.
+      parameters:
+      - description: Transaction hash to retrieve UTXO inputs for
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Success response
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.TransactionInput'
+            type: array
+        "400":
+          description: Bad request
+          schema:
+            $ref: '#/definitions/errors.ServerError'
+        "404":
+          description: Transaction not found
+          schema:
+            $ref: '#/definitions/errors.ServerError'
+        "500":
+          description: Server error
+          schema:
+            $ref: '#/definitions/errors.ServerError'
+      summary: Get UTXO Inputs by Transaction Hash
+      tags:
+      - Transactions
+  /indexer/transactions/{tx_hash}/utxos/outputs:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transaction outputs for a given transaction hash.
+      operationId: getUTxOsOutputsByTransaction
+      parameters:
+      - description: The transaction hash to retrieve UTXO outputs for.
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved UTXO outputs.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.TransactionOutput'
+            type: array
+        "400":
+          description: Invalid transaction hash.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Transaction not found or no UTXO outputs found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get UTXO Outputs by Transaction Hash
+      tags:
+      - Transactions
+  /metrics/addresses/count:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the total number of monitored addresses.
+      operationId: getAddressesCount
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved addresses count.
+          schema:
+            properties:
+              count:
+                type: integer
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Total Monitored Addresses Count
+      tags:
+      - Metrics
+  /metrics/assets/count:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the total number of indexed assets.
+      operationId: getAssetsCount
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved assets count.
+          schema:
+            properties:
+              count:
+                type: integer
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Total Indexed Assets Count
+      tags:
+      - Metrics
+  /metrics/latest-block:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the block number and slot number of the most recently
+        indexed block.
+      operationId: getLatestBlock
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved latest block information.
+          schema:
+            properties:
+              block_number:
+                type: integer
+              slot_number:
+                type: integer
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Latest Indexed Block
+      tags:
+      - Metrics
+  /metrics/transactions/count:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the total number of indexed transactions.
+      operationId: getTransactionsCount
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transaction count.
+          schema:
+            properties:
+              count:
+                type: integer
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Total Transaction Count
+      tags:
+      - Metrics
+  /transactions/{tx_hash}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves a transaction by its hash.
+      operationId: getTransactionByHash
+      parameters:
+      - description: The transaction hash to retrieve.
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transaction.
+          schema:
+            $ref: '#/definitions/viewmodel.Transaction'
+        "400":
+          description: Invalid transaction hash.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Transaction not found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transaction by Hash
+      tags:
+      - Transactions
+  /transactions/{tx_hash}/inputs/{input_index}/datum:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the datum associated with a specific transaction input.
+      operationId: getInputDatum
+      parameters:
+      - description: The transaction hash (hex-encoded).
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      - description: The index of the transaction input.
+        in: path
+        name: input_index
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved datum.
+          schema:
+            $ref: '#/definitions/viewmodel.Datum'
+        "400":
+          description: Invalid transaction hash or input index.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Datum not found for the specified input.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Datum for Transaction Input
+      tags:
+      - Transactions
+  /transactions/{tx_hash}/inputs/{input_index}/redeemer:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the redeemer associated with a specific transaction input.
+      operationId: getInputRedeemer
+      parameters:
+      - description: The transaction hash (hex-encoded).
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      - description: The index of the transaction input.
+        in: path
+        name: input_index
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved redeemer.
+          schema:
+            $ref: '#/definitions/viewmodel.Redeemer'
+        "400":
+          description: Invalid transaction hash or input index.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Redeemer not found for the specified input.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Redeemer for Transaction Input
+      tags:
+      - Transactions
+  /transactions/{tx_hash}/outputs/{output_index}/datum:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the datum associated with a specific transaction output.
+      operationId: getOutputDatum
+      parameters:
+      - description: The transaction hash (hex-encoded).
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      - description: The index of the transaction output.
+        in: path
+        name: output_index
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved datum.
+          schema:
+            $ref: '#/definitions/viewmodel.Datum'
+        "400":
+          description: Invalid transaction hash or output index.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Datum not found for the specified output.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Datum for Transaction Output
+      tags:
+      - Transactions
+  /transactions/{tx_hash}/redeemers:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of redeemers associated with a specific transaction
+        hash.
+      operationId: getRedeemersByTxHash
+      parameters:
+      - description: The transaction hash (hex-encoded) to retrieve redeemers for.
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved redeemers.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Redeemer'
+            type: array
+        "400":
+          description: Invalid transaction hash.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Transaction not found or no redeemers found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Redeemers by Transaction Hash
+      tags:
+      - Transactions
+  /transactions/{tx_hash}/utxos:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the unspent transaction outputs (UTxOs) and inputs associated
+        with a specific transaction hash.
+      operationId: getUTxOsByTransaction
+      parameters:
+      - description: The transaction hash (hex-encoded) to retrieve UTxOs for.
+        in: path
+        name: tx_hash
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved UTxOs.
+          schema:
+            $ref: '#/definitions/viewmodel.TransactionUTxOs'
+        "400":
+          description: Invalid transaction hash.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Transaction not found or no UTxOs found for the given hash.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get UTxOs by Transaction Hash
+      tags:
+      - Transactions
+  /transactions/by-slot-range:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves transactions within a specified slot number range, with
+        support for pagination.
+      operationId: getTransactionsBySlotRange
+      parameters:
+      - description: The start slot number of the range (inclusive).
+        in: query
+        name: start_slot
+        required: true
+        type: integer
+      - description: The end slot number of the range (inclusive).
+        in: query
+        name: end_slot
+        required: true
+        type: integer
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid slot number or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: No transactions found within the specified slot range.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Slot Range
+      tags:
+      - Transactions
+  /witnesses/{witness_id}:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve details of a specific witness by its ID.
+      operationId: getWitnessById
+      parameters:
+      - description: The witness ID to retrieve.
+        in: path
+        name: witness_id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved witness.
+          schema:
+            $ref: '#/definitions/viewmodel.Witness'
+        "400":
+          description: Invalid witness ID.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Witness not found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Witness by ID
+      tags:
+      - Witnesses
+  /witnesses/{witness_id}/transactions:
+    get:
+      consumes:
+      - application/json
+      description: Retrieve a list of transactions that include a specific witness
+        ID, with support for pagination.
+      operationId: getTransactionsByWitnessId
+      parameters:
+      - description: The witness ID to retrieve transactions for.
+        in: path
+        name: witness_id
+        required: true
+        type: string
+      - default: 100
+        description: Maximum number of results to return.
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Number of results to skip.
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved transactions.
+          schema:
+            items:
+              $ref: '#/definitions/viewmodel.Transaction'
+            type: array
+        "400":
+          description: Invalid witness ID or pagination parameters.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "404":
+          description: Witness ID not found or no transactions found.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Transactions by Witness ID
+      tags:
+      - Witnesses
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

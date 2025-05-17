@@ -55,18 +55,6 @@ func RouteError(c *fiber.Ctx) error {
 
 }
 
-func TxError(c *fiber.Ctx) error {
-
-	c.Status(fiber.StatusBadRequest)
-	enc := json.NewEncoder(c.Response().BodyWriter())
-	enc.SetIndent("", "    ")
-
-	return enc.Encode(&Message{
-		IsError: true,
-		Message: "Tx Building Failed",
-	})
-
-}
 
 func ServerErrorHandler(c *fiber.Ctx, err error) error {
 	// Status code defaults to 500

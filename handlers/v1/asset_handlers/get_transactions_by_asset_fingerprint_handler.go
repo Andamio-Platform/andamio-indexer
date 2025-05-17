@@ -1,0 +1,72 @@
+package asset_handlers
+
+import (
+	"strconv"
+
+	"github.com/Andamio-Platform/andamio-indexer/database"
+	"github.com/Andamio-Platform/andamio-indexer/viewmodel"
+	"github.com/gofiber/fiber/v2"
+)
+
+// GetTransactionsByAssetFingerprintHandler handles the GET /api/v1/indexer/assets/fingerprint/{asset_fingerprint}/transactions endpoint.
+// @Summary		Get Transactions by Asset Fingerprint
+// @Description	Retrieves a list of transactions associated with a specific asset fingerprint, with support for pagination.
+// @ID				getTransactionsByAssetFingerprint
+// @Tags			Assets
+// @Security		ApiKeyAuth
+// @Accept			json
+// @Produce		json
+// @Param			asset_fingerprint	path		string	true	"The asset fingerprint (hex-encoded) to retrieve transactions for."
+// @Param			limit	query		int		false	"Maximum number of results to return."	default(100)
+// @Param			offset	query		int		false	"Number of results to skip."	default(0)
+// @Success		200		{array}		viewmodel.Transaction	"Successfully retrieved transactions."
+// @Failure		400		{object}	object{error=string}		"Invalid asset fingerprint or pagination parameters."
+// @Failure		404		{object}	object{error=string}		"Asset fingerprint not found or no transactions found."
+// @Failure		500		{object}	object{error=string}		"Internal server error."
+// @Router			/indexer/assets/fingerprint/{asset_fingerprint}/transactions [get]
+func GetTransactionsByAssetFingerprintHandler(db *database.Database) fiber.Handler {
+	return func(c *fiber.Ctx) error {
+		assetFingerprint := c.Params("asset_fingerprint")
+
+		// Get pagination parameters
+		limitStr := c.Query("limit", "100")
+		offsetStr := c.Query("offset", "0")
+
+		limit, err := strconv.Atoi(limitStr)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid limit parameter"})
+		}
+
+		offset, err := strconv.Atoi(offsetStr)
+		if err != nil {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid offset parameter"})
+		}
+
+		transactions, err := db.Metadata().GetTxsByAssetFingerprint(nil, assetFingerprint, limit, offset)
+		if err != nil {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get transactions by asset fingerprint"})
+		}
+
+		// Convert database models to view models
+		transactionViewModels := []viewmodel.Transaction{}
+		for _, tx := range transactions {
+			transactionViewModels = append(transactionViewModels, viewmodel.Transaction{
+				TransactionHash: string(tx.TransactionHash),
+				BlockNumber:     tx.BlockNumber,
+				SlotNumber:      tx.SlotNumber,
+				Inputs:          viewmodel.ConvertTransactionInputsToViewModels(tx.Inputs),
+				Outputs:         viewmodel.ConvertTransactionOutputsToViewModels(tx.Outputs),
+				Fee:             tx.Fee,
+				TTL:             tx.TTL,
+				BlockHash:       string(tx.BlockHash),
+				Metadata:        string(tx.Metadata), // CBOR string representation
+				ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(tx.ReferenceInputs),
+				Withdrawals:     tx.Withdrawals,
+				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates), // Convert [][]byte to []string
+				Witness:         viewmodel.ConvertWitnessModelToViewModel(tx.Witness),
+			})
+		}
+
+		return c.JSON(transactionViewModels)
+	}
+}

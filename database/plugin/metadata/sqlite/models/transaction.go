@@ -1,24 +1,52 @@
 package models
 
-import "errors"
+import (
+	"database/sql/driver"
+	"encoding/json"
+	"errors"
+)
 
 // Assuming byteSliceJsonHex is intended to be stored as a byte slice
 // and the JSON hex encoding is for API representation.
 // We will store it as []byte in the database.
 
+// WithdrawalsMap is a custom type to handle map[string]uint64 for GORM
+type WithdrawalsMap map[string]uint64
+
+// Value implements the driver.Valuer interface for WithdrawalsMap.
+func (w WithdrawalsMap) Value() (driver.Value, error) {
+	if w == nil {
+		return nil, nil
+	}
+	return json.Marshal(w)
+}
+
+// Scan implements the sql.Scanner interface for WithdrawalsMap.
+func (w *WithdrawalsMap) Scan(value interface{}) error {
+	if value == nil {
+		*w = make(WithdrawalsMap)
+		return nil
+	}
+	bytes, ok := value.([]byte)
+	if !ok {
+		return errors.New("Scan source is not []byte")
+	}
+	return json.Unmarshal(bytes, w)
+}
+
 type Transaction struct {
 	ID              uint                `gorm:"primaryKey"`
-	BlockHash       string              `gorm:"index" json:"block_hash"`
+	BlockHash       []byte              `gorm:"index" json:"block_hash"`
 	BlockNumber     uint64              `gorm:"index" json:"block_number"`
 	SlotNumber      uint64              `gorm:"index" json:"slot_number"`
 	TransactionHash []byte              `gorm:"index" json:"transaction_hash"`
 	Inputs          []TransactionInput  `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"inputs"`
-	Outputs         []TransactionOutput `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"outputs"`
+	Outputs         []TransactionOutput `gorm:"foreignKey:UTxOID;references:TransactionHash" json:"outputs"`
 	ReferenceInputs []SimpleUTxO        `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"reference_inputs"`
 	Metadata        []byte              `gorm:"type:blob" json:"metadata"`
 	Fee             uint64              `gorm:"index" json:"fee"`
 	TTL             uint64              `gorm:"index" json:"ttl"`
-	Withdrawals     map[string]uint64   `json:"withdrawals"`
+	Withdrawals     WithdrawalsMap      `gorm:"type:blob" json:"withdrawals"` // Use custom type and store as blob
 	Witness         Witness             `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"witness"`
 	Certificates    [][]byte            `gorm:"type:blob" json:"certificate"`
 }
@@ -34,17 +62,13 @@ func (t *Transaction) GetID() uint {
 }
 
 // GetBlockHash returns the BlockHash of the Transaction.
-func (t *Transaction) GetBlockHash() string {
+func (t *Transaction) GetBlockHash() []byte {
 	return t.BlockHash
 }
 
 // SetBlockHash sets the BlockHash of the Transaction.
-func (t *Transaction) SetBlockHash(blockHash string) error {
-	if blockHash == "" {
-		return errors.New("block hash cannot be empty")
-	}
+func (t *Transaction) SetBlockHash(blockHash []byte) {
 	t.BlockHash = blockHash
-	return nil
 }
 
 // GetBlockNumber returns the BlockNumber of the Transaction.
@@ -133,12 +157,12 @@ func (t *Transaction) SetTTL(ttl uint64) {
 }
 
 // GetWithdrawals returns the Withdrawals of the Transaction.
-func (t *Transaction) GetWithdrawals() map[string]uint64 {
+func (t *Transaction) GetWithdrawals() WithdrawalsMap {
 	return t.Withdrawals
 }
 
 // SetWithdrawals sets the Withdrawals of the Transaction.
-func (t *Transaction) SetWithdrawals(withdrawals map[string]uint64) {
+func (t *Transaction) SetWithdrawals(withdrawals WithdrawalsMap) {
 	t.Withdrawals = withdrawals
 }
 

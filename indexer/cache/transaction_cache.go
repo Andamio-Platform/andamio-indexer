@@ -4,13 +4,14 @@ import (
 	"container/list"
 	"sync"
 
+	"github.com/Andamio-Platform/andamio-indexer/constants"
 	input_chainsync "github.com/blinklabs-io/adder/input/chainsync"
 )
 
 // CacheItem represents an item in the cache
 type CacheItem struct {
-	TxHash string
-	Event  input_chainsync.TransactionEvent
+	TxHash  string
+	Event   input_chainsync.TransactionEvent
 	Context input_chainsync.TransactionContext
 }
 
@@ -59,13 +60,11 @@ func InitTransactionCache(limit int) {
 func GetTransactionCache() *TransactionCache {
 	// Ensure the cache is initialized before returning
 	if globalTransactionCache == nil {
-		// This should ideally be initialized during startup, but as a fallback
-		// we can initialize with a default limit if accessed before Init
-		InitTransactionCache(1000) // Default limit
+
+		InitTransactionCache(constants.TRANSACTION_CACHE_LIMIT)
 	}
 	return globalTransactionCache
 }
-
 
 // Add adds a transaction event to the cache
 func (c *TransactionCache) Add(eventTx input_chainsync.TransactionEvent, eventCtx input_chainsync.TransactionContext) {
@@ -77,13 +76,13 @@ func (c *TransactionCache) Add(eventTx input_chainsync.TransactionEvent, eventCt
 	if element, ok := c.cache[txHash]; ok {
 		// Item exists, move to front
 		c.ll.MoveToFront(element)
-		element.Value.(*CacheItem).Event = eventTx // Update event if needed
+		element.Value.(*CacheItem).Event = eventTx    // Update event if needed
 		element.Value.(*CacheItem).Context = eventCtx // Update context if needed
 	} else {
 		// Item does not exist, add to front
 		item := &CacheItem{
-			TxHash: txHash,
-			Event:  eventTx,
+			TxHash:  txHash,
+			Event:   eventTx,
 			Context: eventCtx,
 		}
 		element := c.ll.PushFront(item)

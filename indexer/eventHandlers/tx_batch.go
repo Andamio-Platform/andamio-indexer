@@ -13,10 +13,14 @@ func AddToTransactionBatch(eventTx input_chainsync.TransactionEvent, eventCtx in
 	txCache := cache.GetTransactionCache()
 	if txCache != nil {
 		txCache.Add(eventTx, eventCtx)
+		slog.Info("Added transaction to batch cache.", "txHash", eventTx.Transaction.Hash(), "currentBatchSize", txCache.Len(), "batchLimit", txCache.Limit())
 		// Check if cache limit is reached and process the batch
 		if txCache.Len() >= txCache.Limit() {
+			slog.Info("Transaction batch limit reached, processing batch.")
 			go ProcessTransactionBatch() // Process in a goroutine to avoid blocking
 		}
+	} else {
+		slog.Error("Transaction cache not initialized when trying to add transaction.")
 	}
 }
 
@@ -28,8 +32,10 @@ func ProcessTransactionBatch() {
 		return
 	}
 
+	slog.Info("Getting transactions from cache for batch processing.")
 	// Get all transactions from the cache and clear it
 	transactionsToProcess := txCache.GetAll()
+	slog.Info("Retrieved transactions from cache.", "count", len(transactionsToProcess))
 
 	if len(transactionsToProcess) == 0 {
 		slog.Info("No transactions to process in the batch")
@@ -43,9 +49,12 @@ func ProcessTransactionBatch() {
 		wg.Add(1)
 		go func(txEvent input_chainsync.TransactionEvent, txContext input_chainsync.TransactionContext) {
 			defer wg.Done()
+			slog.Debug("Processing individual transaction in batch.", "txHash", string(txEvent.Transaction.Hash().Bytes()))
 			err := TxEvent(txEvent, txContext) // Call the TxEvent function to process the transaction
 			if err != nil {
-				slog.Error("Error processing transaction", "txHash", string(txEvent.Transaction.Hash().Bytes()), "error", err)
+				slog.Error("Error processing transaction in batch", "txHash", string(txEvent.Transaction.Hash().Bytes()), "error", err)
+			} else {
+				slog.Debug("Finished processing individual transaction in batch.", "txHash", string(txEvent.Transaction.Hash().Bytes()))
 			}
 		}(item.Event, item.Context)
 	}

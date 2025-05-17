@@ -59,41 +59,63 @@ func (d *Database) Metadata() metadata.MetadataStore {
 
 // Transaction starts a new database transaction and returns a handle to it
 func (d *Database) Transaction(readWrite bool) *Txn {
+	slog.Debug("Starting new database transaction.", "readWrite", readWrite)
 	return NewTxn(d, readWrite)
 }
 
 // BlobTxn starts a new blob-only database transaction and returns a handle to it
 func (d *Database) BlobTxn(readWrite bool) *Txn {
+	slog.Debug("Starting new blob-only transaction.", "readWrite", readWrite)
 	return NewBlobOnlyTxn(d, readWrite)
 }
 
 // MetadataTxn starts a new metadata-only database transaction and returns a handle to it
 func (d *Database) MetadataTxn(readWrite bool) *Txn {
+	slog.Debug("Starting new metadata-only transaction.", "readWrite", readWrite)
 	return NewMetadataOnlyTxn(d, readWrite)
 }
 
 // Close cleans up the database connections
 func (d *Database) Close() error {
+	slog.Info("Closing database connections...")
 	var err error
 	// Close metadata
+	slog.Info("Closing metadata store...")
 	metadataErr := d.Metadata().Close()
 	err = errors.Join(err, metadataErr)
+	if metadataErr == nil {
+		slog.Info("Metadata store closed successfully.")
+	} else {
+		slog.Error("Failed to close metadata store.", "error", metadataErr)
+	}
 	// Close blob
+	slog.Info("Closing blob store...")
 	blobErr := d.Blob().Close()
 	err = errors.Join(err, blobErr)
+	if blobErr == nil {
+		slog.Info("Blob store closed successfully.")
+	} else {
+		slog.Error("Failed to close blob store.", "error", blobErr)
+	}
+	slog.Info("Database connections closed.")
 	return err
 }
 
 func (d *Database) init() error {
+	slog.Info("Initializing database...")
 	if d.logger == nil {
 		// Create logger to throw away logs
 		// We do this so we don't have to add guards around every log operation
 		d.logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
 	}
 	// Check commit timestamp
+	slog.Info("Checking commit timestamp...")
 	if err := d.checkCommitTimestamp(); err != nil {
+		slog.Error("Commit timestamp check failed.", "error", err)
 		return err
 	}
+	slog.Info("Commit timestamp check successful.")
+	slog.Info("Database initialized.")
 	return nil
 }
 
@@ -102,14 +124,23 @@ func New(
 	logger *slog.Logger,
 	dataDir string,
 ) (*Database, error) {
+	slog.Info("Creating new database instance...", "dataDir", dataDir)
+	slog.Info("Initializing metadata store (sqlite)...")
 	metadataDb, err := metadata.New("sqlite", dataDir, logger)
 	if err != nil {
+		slog.Error("Failed to initialize metadata store.", "error", err)
 		return nil, err
 	}
+	slog.Info("Metadata store initialized successfully.")
+
+	slog.Info("Initializing blob store (badger)...")
 	blobDb, err := blob.New("badger", dataDir, logger)
 	if err != nil {
+		slog.Error("Failed to initialize blob store.", "error", err)
 		return nil, err
 	}
+	slog.Info("Blob store initialized successfully.")
+
 	db := &Database{
 		logger:   logger,
 		blob:     blobDb,
@@ -118,8 +149,10 @@ func New(
 	}
 	if err := db.init(); err != nil {
 		// Database is available for recovery, so return it with error
+		slog.Error("Database initialization failed.", "error", err)
 		return db, err
 	}
+	slog.Info("New database instance created successfully.")
 	return db, nil
 }
 

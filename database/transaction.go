@@ -23,7 +23,7 @@ import (
 
 type Transaction struct {
 	ID              uint                       `gorm:"primaryKey"`
-	BlockHash       string                     `gorm:"index" json:"block_hash"`
+	BlockHash       []byte                     `gorm:"index" json:"block_hash"`
 	BlockNumber     uint64                     `gorm:"index" json:"block_number"`
 	SlotNumber      uint64                     `gorm:"index" json:"slot_number"`
 	TransactionHash []byte                     `gorm:"index" json:"transaction_hash"`
@@ -50,17 +50,13 @@ func (tx *Transaction) GetID() uint {
 }
 
 // GetBlockHash returns the BlockHash of the Transaction.
-func (tx *Transaction) GetBlockHash() string {
+func (tx *Transaction) GetBlockHash() []byte {
 	return tx.BlockHash
 }
 
 // SetBlockHash sets the BlockHash of the Transaction.
-func (tx *Transaction) SetBlockHash(blockHash string) error {
-	if blockHash == "" {
-		return errors.New("block hash cannot be empty")
-	}
+func (tx *Transaction) SetBlockHash(blockHash []byte) {
 	tx.BlockHash = blockHash
-	return nil
 }
 
 // GetBlockNumber returns the BlockNumber of the Transaction.
@@ -212,7 +208,7 @@ func (tx *Transaction) loadCbor(txn *Txn) error {
 }
 
 // NewTx stores a transaction's metadata in the metadata store and its CBOR in the blob store
-func (d *Database) NewTx(blockHash string, blockNumber uint64, slotNumber uint64, transactionHash []byte, inputs []models.TransactionInput, outputs []models.TransactionOutput, referenceInputs []models.SimpleUTxO, metadata []byte, fee uint64, ttl uint64, withdrawals map[string]uint64, witness models.Witness, certificates [][]byte, transactionCBOR []byte, txn *Txn) error {
+func (d *Database) NewTx(blockHash []byte, blockNumber uint64, slotNumber uint64, transactionHash []byte, inputs []models.TransactionInput, outputs []models.TransactionOutput, referenceInputs []models.SimpleUTxO, metadata []byte, fee uint64, ttl uint64, withdrawals map[string]uint64, witness models.Witness, certificates [][]byte, transactionCBOR []byte, txn *Txn) error {
 	if txn == nil {
 		txn = d.Transaction(true)
 		defer txn.Commit() //nolint:errcheck
@@ -245,15 +241,15 @@ func (d *Database) NewTx(blockHash string, blockNumber uint64, slotNumber uint64
 	return d.metadata.SetTx(txn.Metadata(), &tempTx)
 }
 
-// GetTxByHash retrieves a transaction's metadata and CBOR by its hash
-func (d *Database) GetTxByHash(txHash []byte, txn *Txn) (*models.Transaction, []byte, error) {
+// GetTxByTxHash retrieves a transaction's metadata and CBOR by its hash
+func (d *Database) GetTxByTxHash(txHash []byte, txn *Txn) (*models.Transaction, []byte, error) {
 	if txn == nil {
 		txn = d.Transaction(false)
 		defer txn.Commit() //nolint:errcheck
 	}
 
 	// Get metadata from metadata DB
-	tx, err := d.metadata.GetTxByHash(txn.Metadata(), txHash)
+	tx, err := d.metadata.GetTxByTxHash(txn.Metadata(), txHash)
 	if err != nil {
 		return nil, nil, err
 	}

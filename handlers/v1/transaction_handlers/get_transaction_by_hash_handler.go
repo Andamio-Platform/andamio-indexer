@@ -1,61 +1,71 @@
 package transaction_handlers
 
 import (
-	"net/http"
+	"encoding/hex"
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
-	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
-	"github.com/gofiber/fiber/v2"                 // Use fiber
-	fiberLogger "github.com/gofiber/fiber/v2/log" // Use fiber logger
-	"gorm.io/gorm"
+	"github.com/Andamio-Platform/andamio-indexer/viewmodel"
+	"github.com/gofiber/fiber/v2"
+	fiberLogger "github.com/gofiber/fiber/v2/log"
 )
 
 // GetTransactionByHashHandler handles the request to get a transaction by its hash.
-func GetTransactionByHashHandler(c *fiber.Ctx, db *database.Database) error { // Use fiber.Ctx and accept db
-	txHash := c.Params("tx_hash")
-
-	if db == nil {
-		fiberLogger.Error("database not available")                                                        // Use fiber logger
-		return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "database not available"}) // Use fiber JSON
-	}
-
-	txn := db.MetadataTxn(false) // Read-only transaction
-	defer txn.Discard()          // Use Discard for read-only transaction
-
-	var transaction models.Transaction
-	result := txn.Metadata().Where("tx_hash = ?", txHash).First(&transaction)
-
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			fiberLogger.Errorf("Transaction not found for hash %s", txHash)                        // Use fiber logger
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "transaction not found"}) // Use fiber JSON
-		} else {
-			fiberLogger.Errorf("Failed to fetch transaction for hash %s: %v", txHash, result.Error)                                                  // Use fiber logger
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch transaction", "details": result.Error.Error()}) // Use fiber JSON
+//
+//	@Summary		Get Transaction by Hash
+//	@Description	Retrieves a transaction by its hash.
+//	@ID				getTransactionByHash
+//	@Tags			Transactions
+//	@Security		ApiKeyAuth
+//	@Accept			json
+//	@Produce		json
+//	@Param			tx_hash	path		string	true	"The transaction hash to retrieve."
+//	@Success		200		{object}	viewmodel.Transaction	"Successfully retrieved transaction."
+//	@Failure		400		{object}	object{error=string}		"Invalid transaction hash."
+//	@Failure		404		{object}	object{error=string}		"Transaction not found."
+//	@Failure		500		{object}	object{error=string}		"Internal server error."
+//	@Router			/transactions/{tx_hash} [get]
+func GetTransactionByHashHandler(db *database.Database) fiber.Handler { // Use fiber.Ctx and accept db
+	return func(c *fiber.Ctx) error {
+		txHashStr := c.Params("tx_hash")
+		txHash, err := hex.DecodeString(txHashStr)
+		if err != nil {
+			fiberLogger.Errorf("Invalid transaction hash: %v", err)
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid transaction hash"})
 		}
-	}
 
-	// Fetch and include related inputs, outputs, metadata, witnesses, datum, and redeemers
-	result = txn.Metadata().
-		Preload("Block").
-		Preload("Inputs.Utxo").
-		Preload("Inputs.Redeemer").
-		Preload("Outputs.Utxo").
-		Preload("Outputs.Address").
-		Preload("Outputs.Datum").
-		Preload("Witnesses").
-		Where("tx_hash = ?", txHash).
-		First(&transaction)
-
-	if result.Error != nil {
-		if result.Error == gorm.ErrRecordNotFound {
-			fiberLogger.Errorf("Transaction not found for hash %s with relations", txHash)         // Use fiber logger
-			return c.Status(http.StatusNotFound).JSON(fiber.Map{"error": "transaction not found"}) // Use fiber JSON
-		} else {
-			fiberLogger.Errorf("Failed to fetch transaction with relations for hash %s: %v", txHash, result.Error)                                                  // Use fiber logger
-			return c.Status(http.StatusInternalServerError).JSON(fiber.Map{"error": "failed to fetch transaction with relations", "details": result.Error.Error()}) // Use fiber JSON
+		if db == nil {
+			fiberLogger.Error("database not available")                                                         // Use fiber logger
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database not available"}) // Use fiber JSON
 		}
-	}
 
-	return c.Status(http.StatusOK).JSON(transaction) // Use fiber JSON
+		transaction, err := db.Metadata().GetTxByTxHash(nil, txHash)
+		if err != nil {
+			fiberLogger.Errorf("Failed to get transaction by hash %s: %v", txHashStr, err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get transaction by hash"})
+		}
+
+		if transaction == nil {
+			fiberLogger.Errorf("Transaction not found for hash %s", txHashStr)
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Transaction not found"})
+		}
+
+		// Convert database model to view model
+		transactionViewModel := viewmodel.Transaction{
+			TransactionHash: string(transaction.TransactionHash),
+			BlockNumber:     transaction.BlockNumber,
+			SlotNumber:      transaction.SlotNumber,
+			Inputs:          viewmodel.ConvertTransactionInputsToViewModels(transaction.Inputs),
+			Outputs:         viewmodel.ConvertTransactionOutputsToViewModels(transaction.Outputs),
+			Fee:             transaction.Fee,
+			TTL:             transaction.TTL,
+			BlockHash:       string(transaction.BlockHash),
+			Metadata:        string(transaction.Metadata), // CBOR string representation
+			ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(transaction.ReferenceInputs),
+			Withdrawals:     transaction.Withdrawals,
+			Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(transaction.Certificates), // Convert [][]byte to []string
+			Witness:         viewmodel.ConvertWitnessModelToViewModel(transaction.Witness),
+		}
+
+		return c.Status(fiber.StatusOK).JSON(transactionViewModel) // Use fiber JSON
+	}
 }

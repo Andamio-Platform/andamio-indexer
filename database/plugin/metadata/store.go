@@ -29,15 +29,21 @@ type MetadataStore interface {
 	GetCommitTimestamp(txn *gorm.DB) (int64, error)
 	SetCommitTimestamp(*gorm.DB, int64) error
 	Transaction() *gorm.DB
+	AutoMigrate(txn *gorm.DB, dst ...interface{}) error
+	Create(txn *gorm.DB, value interface{}) *gorm.DB
+	First(txn *gorm.DB, args interface{}) *gorm.DB
+	Order(txn *gorm.DB, args interface{}) *gorm.DB
+	Where(txn *gorm.DB, query interface{}, args ...interface{}) *gorm.DB
 
 	// Address
 	AddAddress(txn *gorm.DB, address string) error
 	GetAddress(txn *gorm.DB, address string) (string, error)
 	GetAllAddresses(txn *gorm.DB) ([]string, error)
+	RemoveAddress(txn *gorm.DB, address string) error
 
 	// Transaction
 	SetTx(txn *gorm.DB, tx *models.Transaction) error
-	GetTxByHash(txn *gorm.DB, txHash []byte) (*models.Transaction, error)
+	GetTxByTxHash(txn *gorm.DB, txHash []byte) (*models.Transaction, error)
 	GetTxsByBlockNumber(txn *gorm.DB, blockNumber uint64, limit, offset int) ([]models.Transaction, error)
 	GetTxsByInputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
 	GetTxsByOutputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
@@ -48,9 +54,10 @@ type MetadataStore interface {
 	DeleteTxByHash(txn *gorm.DB, txHash []byte) error
 	DeleteTxsByBlockNumber(txn *gorm.DB, blockNumber uint64) error
 	GetTxInputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionInput, error)
-	GetTxOutputByID(txn *gorm.DB, arg1 uint) (*models.TransactionOutput, error)
 	GetTxOutputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionOutput, error)
 	GetTxByID(txn *gorm.DB, arg1 uint) (*models.Transaction, error)
+	GetTxInputByID(txn *gorm.DB, id uint) (*models.TransactionInput, error)
+	GetTxOutputByID(txn *gorm.DB, id uint) (*models.TransactionOutput, error)
 
 	// Added Getters and Setters for other types
 	GetAssets(txn *gorm.DB, utxoID []byte, utxoIndex uint32) ([]models.Asset, error)
@@ -82,6 +89,15 @@ type MetadataStore interface {
 	SetWitness(txn *gorm.DB, witness *models.Witness) error
 	GetWitnessByTransactionHash(txn *gorm.DB, transactionHash []byte) (*models.Witness, error)
 	GetWitnessByID(txn *gorm.DB, arg1 uint) (*models.Witness, error)
+
+	// New functions for API endpoints
+	GetTxInputsByAddress(txn *gorm.DB, address string, limit, offset int) ([]models.TransactionInput, error)
+	GetTxOutputsByAddress(txn *gorm.DB, address string, limit, offset int) ([]models.TransactionOutput, error)
+	GetTxsByPolicyId(txn *gorm.DB, policyId []byte, limit, offset int) ([]models.Transaction, error)
+	GetTxsByTokenName(txn *gorm.DB, tokenName []byte, limit, offset int) ([]models.Transaction, error)
+	GetTxsByAssetFingerprint(txn *gorm.DB, assetFingerprint string, limit, offset int) ([]models.Transaction, error)
+	GetTxsByPolicyIdAndTokenName(txn *gorm.DB, policyId []byte, tokenName []byte, limit, offset int) ([]models.Transaction, error)
+	GetUTxOsByAssetFingerprint(txn *gorm.DB, assetFingerprint []byte, limit, offset int) ([]models.SimpleUTxO, error)
 }
 
 // For now, this always returns a sqlite plugin

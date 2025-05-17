@@ -7,7 +7,7 @@ type Witness struct {
 	PlutusV1Scripts [][]byte   `gorm:"type:blob" json:"plutus_v1_scripts"`
 	PlutusV2Scripts [][]byte   `gorm:"type:blob" json:"plutus_v2_scripts"`
 	PlutusV3Scripts [][]byte   `gorm:"type:blob" json:"plutus_v3_scripts"`
-	Redeemers       []Redeemer `gorm:"foreignKey:WitnessID;references:ID" json:"redeemers"`
+	Redeemers       []Redeemer `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"redeemers"`
 	// NativeScripts []NativeScript
 }
 

@@ -1,9 +1,8 @@
-
 # Andamio Indexer
 
-## Description
+## Project Overview
 
-The Andamio Indexer is a service that indexes blockchain data, making it easily accessible and searchable. It supports various data types, including blocks, transactions, addresses, and UTXOs. The indexer is designed to be modular and extensible, allowing it to be adapted to different blockchain networks and data sources.
+The Andamio Indexer is a service designed to efficiently index blockchain data, making it readily available and easily searchable through a REST API. It supports the indexing of various data types, including blocks, transactions, addresses, and UTXOs. With a modular and extensible architecture, the indexer can be adapted to integrate with different blockchain networks and data sources.
 
 ## Features
 
@@ -13,7 +12,7 @@ The Andamio Indexer is a service that indexes blockchain data, making it easily 
 *   **REST API:** Provides a REST API for accessing indexed data.
 *   **SQLite and BadgerDB Support:** Uses SQLite for metadata storage and BadgerDB for blob storage.
 
-## Installation
+## Dependencies and Installation
 
 1.  **Prerequisites:**
     *   Go 1.20 or higher
@@ -27,34 +26,44 @@ The Andamio Indexer is a service that indexes blockchain data, making it easily 
     cd andamio-indexer
     ```
 
-3.  **Build the project:**
+3.  **Install Go Modules:**
 
     ```bash
-    go build -o build/andamio-indexer main.go
+    go mod download
     ```
 
-## Usage
+## Building and Running
 
-1.  **Configuration:**
+1.  **Build the project:**
+
+    ```bash
+    go build -o ./build/andamio-indexer main.go
+    ```
+
+2.  **Configuration:**
 
     *   Create a `config.json` file with the desired configuration options.
     *   Refer to the `config/config.go` file for available configuration options.
 
-2.  **Run the indexer:**
+3.  **Run the indexer:**
 
     ```bash
-    ./build/andamio-indexer --config config/config.json
+    ./build/andamio-indexer -config config/config.json
     ```
 
-## Configuration
+## Architecture and Key Components
 
-The Andamio Indexer can be configured using a `config.json` file. The following configuration options are available:
+The Andamio Indexer follows a modular architecture with key components responsible for different aspects of the indexing process. The main components include:
 
-*   `network`: network configuration options, such as magic and socketPath.
-*   `Database`: Database configuration options, such as the database file path.
-*   `andamio`: andamio configuration options, such as PolicyID and RefTx.
+*   **API Handlers:** Located in the `handlers/v1` directory, these handle incoming REST API requests and interact with the database to retrieve indexed data.
+*   **Indexer Core:** Responsible for receiving and processing blockchain transaction events. This includes filtering relevant events, batching transactions, and coordinating the storage of data.
+*   **Database Interaction:** The indexer utilizes a database layer to store the indexed blockchain data. It supports SQLite for metadata and BadgerDB for blob data.
 
-Refer to the `config/config.go` file for detailed information on each configuration option.
+For a detailed explanation of the indexer's internal data flow from receiving transactions to storing them, please refer to the [Indexer Internal Workings Documentation](docs/indexer_internals.md).
+
+## API Documentation
+
+For detailed information on the available API endpoints, request parameters, and responses, please refer to the [API Documentation](docs/api.md).
 
 ## Contributing
 

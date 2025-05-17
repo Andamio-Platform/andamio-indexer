@@ -2,7 +2,6 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"log/slog"
 	"os"
 
@@ -44,26 +43,36 @@ func main() {
 	)
 	flag.Parse()
 
-	err := config.Load(cmdlineFlags.configFile)
-	if err != nil {
-		fmt.Printf("Failed to load config: %s\n", err)
+	if cmdlineFlags.configFile == "" {
+		slog.Error("Config file not specified. Use the -config flag.")
 		os.Exit(1)
 	}
 
-	logger := slog.Default()
+	err := config.Load(cmdlineFlags.configFile)
+	if err != nil {
+		slog.Error("Failed to load config", "error", err)
+		os.Exit(1)
+	}
+
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	}))
+	slog.SetDefault(logger)
 
 	db, err := database.New(logger, config.GlobalConfig.Database.DatabaseDIR)
 	if err != nil {
-		fmt.Printf("Failed to init database: %s\n", err)
+		slog.Error("Failed to init database", "error", err)
 		os.Exit(1)
 	}
 
 	database.SetGlobalDB(db)
 
-	if err := indexer.StartIndexer(); err != nil {
-		fmt.Printf("Failed to init adder: %s\n", err)
-		os.Exit(1)
-	}
+	go func() {
+		if err := indexer.StartIndexer(logger); err != nil {
+			slog.Error("Failed to init adder", "error", err)
+			os.Exit(1)
+		}
+	}()
 
 	defer db.Close()
 

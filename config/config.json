@@ -1,7 +1,7 @@
 {
   "network": {
     "magic": 1,
-    "socketPath": "/ipc/node.socket"
+    "socketPath": "/home/mixaxim_dev/network/preprod/ipc/node.socket"
   },
   "database": {
     "databaseDir": "./db"
