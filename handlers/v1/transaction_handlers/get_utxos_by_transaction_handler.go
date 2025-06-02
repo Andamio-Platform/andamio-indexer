@@ -55,6 +55,6 @@ func GetUTxOsByTransactionHandler(db *database.Database) fiber.Handler { // Use 
 			Outputs: viewmodel.ConvertTransactionOutputsToViewModels(transaction.Outputs),
 		}
 
-		return c.Status(fiber.StatusOK).JSON(transactionUTxOs) // Use fiber JSON
+		return c.Status(fiber.StatusOK).JSON(transactionUTxOs)
 	}
 }

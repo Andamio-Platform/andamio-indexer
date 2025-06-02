@@ -1,13 +1,13 @@
 package transaction_handlers
 
 import (
+	"encoding/hex"
 	"log/slog"
 	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
-	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 	"github.com/Andamio-Platform/andamio-indexer/viewmodel"
 )
 
@@ -63,14 +63,9 @@ func GetTransactionsBySlotRangeHandler(db *database.Database, logger *slog.Logge
 			})
 		}
 
-		var transactions []models.Transaction
-		result := db.Metadata().DB().Model(&models.Transaction{}).
-			Where("slot_number BETWEEN ? AND ?", startSlot, endSlot).
-			Limit(limit).Offset(offset).
-			Find(&transactions)
-
-		if result.Error != nil {
-			logger.Error("Error getting transactions by slot range", "error", result.Error)
+		transactions, err := db.GetTxsBySlotRange(startSlot, endSlot, limit, offset, nil)
+		if err != nil {
+			logger.Error("Error getting transactions by slot range", "error", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 				"error": "Internal server error",
 			})
@@ -86,7 +81,7 @@ func GetTransactionsBySlotRangeHandler(db *database.Database, logger *slog.Logge
 		transactionViewModels := []viewmodel.Transaction{}
 		for _, tx := range transactions {
 			transactionViewModels = append(transactionViewModels, viewmodel.Transaction{
-				TransactionHash: string(tx.TransactionHash),
+				TransactionHash: hex.EncodeToString(tx.TransactionHash),
 				BlockNumber:     tx.BlockNumber,
 				SlotNumber:      tx.SlotNumber,
 				Inputs:          viewmodel.ConvertTransactionInputsToViewModels(tx.Inputs),
@@ -94,11 +89,12 @@ func GetTransactionsBySlotRangeHandler(db *database.Database, logger *slog.Logge
 				Fee:             tx.Fee,
 				TTL:             tx.TTL,
 				BlockHash:       string(tx.BlockHash),
-				Metadata:        string(tx.Metadata), // CBOR string representation
+				Metadata:        hex.EncodeToString(tx.Metadata),
 				ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(tx.ReferenceInputs),
 				Withdrawals:     tx.Withdrawals,
-				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates), // Convert [][]byte to []string
+				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates),
 				Witness:         viewmodel.ConvertWitnessModelToViewModel(tx.Witness),
+				TransactionCBOR: hex.EncodeToString(tx.TransactionCBOR),
 			})
 		}
 

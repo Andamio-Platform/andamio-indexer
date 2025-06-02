@@ -45,7 +45,8 @@ type MetadataStore interface {
 	SetTx(txn *gorm.DB, tx *models.Transaction) error
 	GetTxByTxHash(txn *gorm.DB, txHash []byte) (*models.Transaction, error)
 	GetTxsByBlockNumber(txn *gorm.DB, blockNumber uint64, limit, offset int) ([]models.Transaction, error)
-	GetTxsByInputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
+	GetTxsBySlotRange(txn *gorm.DB, startSlot, endSlot uint64, limit, offset int) ([]models.Transaction, error)
+	GetTxsByInputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.TransactionInput, error)
 	GetTxsByOutputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
 	GetTxsByAnyAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error)
 	SetTxs(txn *gorm.DB, txs []*models.Transaction) error
@@ -53,6 +54,7 @@ type MetadataStore interface {
 	CountTxs(txn *gorm.DB) (int64, error)
 	DeleteTxByHash(txn *gorm.DB, txHash []byte) error
 	DeleteTxsByBlockNumber(txn *gorm.DB, blockNumber uint64) error
+	GetUniqueAddressesCount(txn *gorm.DB) (int64, error)
 	GetTxInputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionInput, error)
 	GetTxOutputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionOutput, error)
 	GetTxByID(txn *gorm.DB, arg1 uint) (*models.Transaction, error)
@@ -62,6 +64,7 @@ type MetadataStore interface {
 	// Added Getters and Setters for other types
 	GetAssets(txn *gorm.DB, utxoID []byte, utxoIndex uint32) ([]models.Asset, error)
 	SetAsset(txn *gorm.DB, asset *models.Asset) error
+	CountUniqueAssets(txn *gorm.DB) (int64, error)
 
 	GetDatum(txn *gorm.DB, utxoID []byte, utxoIndex uint32) (*models.Datum, error)
 	GetDatumByHash(txn *gorm.DB, arg1 []byte) (*models.Datum, error)
@@ -95,9 +98,11 @@ type MetadataStore interface {
 	GetTxOutputsByAddress(txn *gorm.DB, address string, limit, offset int) ([]models.TransactionOutput, error)
 	GetTxsByPolicyId(txn *gorm.DB, policyId []byte, limit, offset int) ([]models.Transaction, error)
 	GetTxsByTokenName(txn *gorm.DB, tokenName []byte, limit, offset int) ([]models.Transaction, error)
-	GetTxsByAssetFingerprint(txn *gorm.DB, assetFingerprint string, limit, offset int) ([]models.Transaction, error)
+	GetTxsByAssetFingerprint(txn *gorm.DB, assetFingerprint []byte, limit, offset int) ([]models.Transaction, error)
 	GetTxsByPolicyIdAndTokenName(txn *gorm.DB, policyId []byte, tokenName []byte, limit, offset int) ([]models.Transaction, error)
 	GetUTxOsByAssetFingerprint(txn *gorm.DB, assetFingerprint []byte, limit, offset int) ([]models.SimpleUTxO, error)
+	GetTransactionInputsByAssetFingerprint(txn *gorm.DB, assetFingerprint []byte, limit, offset int) ([]models.TransactionInput, error)
+	GetTransactionOutputsByAssetFingerprint(txn *gorm.DB, assetFingerprint []byte, limit, offset int) ([]models.TransactionOutput, error)
 }
 
 // For now, this always returns a sqlite plugin

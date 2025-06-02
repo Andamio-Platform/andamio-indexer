@@ -2,6 +2,7 @@ package sqlite
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 	"gorm.io/gorm"
@@ -33,7 +34,7 @@ func (d *MetadataStoreSqlite) SetTx(txn *gorm.DB, tx *models.Transaction) error 
 	if err := d.setInputs(txn, tx.Inputs, tx.TransactionHash); err != nil {
 		return err
 	}
-	if err := d.setOutputs(txn, tx.Outputs); err != nil {
+	if err := d.setOutputs(txn, tx.Outputs, tx.TransactionHash); err != nil {
 		return err
 	}
 	if err := d.setReferenceInputs(txn, tx.ReferenceInputs, tx.TransactionHash); err != nil {
@@ -66,12 +67,13 @@ func (d *MetadataStoreSqlite) setInputs(txn *gorm.DB, inputs []models.Transactio
 }
 
 // setOutputs saves a slice of transaction outputs to the database
-func (d *MetadataStoreSqlite) setOutputs(txn *gorm.DB, outputs []models.TransactionOutput) error {
+func (d *MetadataStoreSqlite) setOutputs(txn *gorm.DB, outputs []models.TransactionOutput, txHash []byte) error {
 	db := txn
 	if db == nil {
 		db = d.db
 	}
 	for _, output := range outputs {
+		output.TransactionHash = txHash // Set foreign key
 		// Save the TransactionOutput record
 		result := db.Save(&output)
 		if result.Error != nil {
@@ -83,6 +85,7 @@ func (d *MetadataStoreSqlite) setOutputs(txn *gorm.DB, outputs []models.Transact
 			// Ensure these fields are set correctly on the asset before saving
 			asset.UTxOID = output.UTxOID
 			asset.UTxOIDIndex = output.UTxOIDIndex
+			d.logger.Debug(fmt.Sprintf("setOutputs: Saving Asset - Output UTxOID=%x, Output UTxOIDIndex=%d, Asset UTxOID=%x, Asset UTxOIDIndex=%d, PolicyId=%x, Name=%x", output.UTxOID, output.UTxOIDIndex, asset.UTxOID, asset.UTxOIDIndex, asset.PolicyId, asset.Name))
 			if err := d.SetAsset(txn, &asset); err != nil { // Assuming SetAsset takes a single asset and handles its saving
 				return err
 			}
@@ -217,19 +220,14 @@ func (d *MetadataStoreSqlite) GetTxsByBlockNumber(txn *gorm.DB, blockNumber uint
 	return transactions, nil
 }
 
-// GetTxsByInputAddress retrieves transactions where the given address appears in the inputs with pagination support.
-// This function joins the transactions and transaction_inputs tables on the transaction hash to find transactions
-// that have an input from the given address.
-func (d *MetadataStoreSqlite) GetTxsByInputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.Transaction, error) {
+// GetTxsBySlotRange retrieves all transactions for a given slot range with pagination support
+func (d *MetadataStoreSqlite) GetTxsBySlotRange(txn *gorm.DB, startSlot, endSlot uint64, limit, offset int) ([]models.Transaction, error) {
 	db := txn
 	if db == nil {
 		db = d.db
 	}
 	var transactions []models.Transaction
-
-	query := db.Joins("JOIN transaction_inputs ON transactions.transaction_hash = transaction_inputs.transaction_hash").
-		Where("transaction_inputs.address = ?", []byte(address)). // Filter by the address in the input
-		Distinct("transactions.transaction_hash")                 // Ensure unique transactions
+	query := db.Where("slot_number BETWEEN ? AND ?", startSlot, endSlot)
 
 	if limit > 0 || offset >= 0 {
 		query = query.Limit(limit).Offset(offset)
@@ -246,11 +244,9 @@ func (d *MetadataStoreSqlite) GetTxsByInputAddress(txn *gorm.DB, address string,
 		Preload("Witness").
 		Preload("Witness.Redeemers").
 		Find(&transactions)
-
 	if result.Error != nil {
 		return nil, result.Error
 	}
-
 	return transactions, nil
 }
 
@@ -267,7 +263,7 @@ func (d *MetadataStoreSqlite) GetTxsByOutputAddress(txn *gorm.DB, address string
 
 	// Find the OutputID (transaction hash) of transactions that have an output to the given address
 	result := db.Model(&models.TransactionOutput{}).
-		Select("DISTINCT output_id").
+		Select("DISTINCT transaction_hash").
 		Where("address = ?", []byte(address)). // Filter by the address in the output
 		Find(&outputTxHashes)
 	if result.Error != nil {
@@ -313,11 +309,13 @@ func (d *MetadataStoreSqlite) GetTxsByAnyAddress(txn *gorm.DB, address string, l
 	}
 	var transactions []models.Transaction
 	uniqueTxHashes := make(map[string]bool)
+	d.logger.Debug(fmt.Sprintf("GetTxsByAnyAddress: querying for address: %s", address))
 
 	// Get transaction hashes from inputs
 	var inputTxHashes [][]byte
 	result := db.Model(&models.TransactionInput{}).
-		Select("DISTINCT transaction_inputs.transaction_hash").
+		Select("transaction_inputs.transaction_hash").
+		// Where("transaction_inputs.address = ?", decodedAddress.Bytes()).
 		Where("transaction_inputs.address = ?", []byte(address)).
 		Find(&inputTxHashes)
 	if result.Error != nil {
@@ -330,7 +328,8 @@ func (d *MetadataStoreSqlite) GetTxsByAnyAddress(txn *gorm.DB, address string, l
 	// Get transaction hashes from outputs
 	var outputTxHashes [][]byte
 	result = db.Model(&models.TransactionOutput{}).
-		Select("DISTINCT output_id").
+		Select("transaction_hash").
+		// Where("address = ?", decodedAddress.Bytes()).
 		Where("address = ?", []byte(address)).
 		Find(&outputTxHashes)
 	if result.Error != nil {
@@ -345,6 +344,7 @@ func (d *MetadataStoreSqlite) GetTxsByAnyAddress(txn *gorm.DB, address string, l
 	for hashStr := range uniqueTxHashes {
 		finalTxHashes = append(finalTxHashes, []byte(hashStr))
 	}
+	d.logger.Debug(fmt.Sprintf("GetTxsByAnyAddress: found %d unique transaction hashes", len(finalTxHashes)))
 
 	if len(finalTxHashes) == 0 {
 		return transactions, nil // No transactions found for this address
@@ -368,11 +368,10 @@ func (d *MetadataStoreSqlite) GetTxsByAnyAddress(txn *gorm.DB, address string, l
 		Preload("Witness").
 		Preload("Witness.Redeemers").
 		Find(&transactions)
-	if result.Error != nil {
-		return nil, result.Error
-	}
-
-	return transactions, nil
+		if result.Error != nil {
+			return nil, result.Error
+		}
+		return transactions, nil
 }
 
 // SetTxs inserts or updates a batch of transaction records.
@@ -464,5 +463,72 @@ func (d *MetadataStoreSqlite) DeleteTxsByBlockNumber(txn *gorm.DB, blockNumber u
 	if result.Error != nil {
 		return result.Error
 	}
+
 	return nil
+}
+
+// GetTxsByInputAddress retrieves transaction inputs where the given address appears in the inputs with pagination support.
+// This function directly queries the transaction_inputs table and preloads associated assets and datum.
+func (d *MetadataStoreSqlite) GetTxsByInputAddress(txn *gorm.DB, address string, limit, offset int) ([]models.TransactionInput, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
+	var transactionInputs []models.TransactionInput
+
+	query := db.Where("address = ?", []byte(address))
+
+	if limit > 0 || offset >= 0 {
+		query = query.Limit(limit).Offset(offset)
+	}
+
+	result := query.
+		Preload("Asset").
+		Preload("Datum").
+		Find(&transactionInputs)
+
+	if result.Error != nil {
+		return nil, result.Error
+	}
+
+	return transactionInputs, nil
+}
+
+// GetUniqueAddressesCount retrieves the total count of unique addresses from all transactions.
+func (d *MetadataStoreSqlite) GetUniqueAddressesCount(txn *gorm.DB) (int64, error) {
+	db := txn
+	if db == nil {
+		db = d.db
+	}
+
+	uniqueAddresses := make(map[string]bool)
+	pageSize := 1000 // Process transactions in batches
+
+	var totalTxs int64
+	result := db.Model(&models.Transaction{}).Count(&totalTxs)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+
+	for offset := 0; int64(offset) < totalTxs; offset += pageSize {
+		var transactions []models.Transaction
+		result := db.Limit(pageSize).Offset(offset).
+			Preload("Inputs").
+			Preload("Outputs").
+			Find(&transactions)
+		if result.Error != nil {
+			return 0, result.Error
+		}
+
+		for _, tx := range transactions {
+			for _, input := range tx.Inputs {
+				uniqueAddresses[string(input.Address)] = true
+			}
+			for _, output := range tx.Outputs {
+				uniqueAddresses[string(output.Address)] = true
+			}
+		}
+	}
+
+	return int64(len(uniqueAddresses)), nil
 }

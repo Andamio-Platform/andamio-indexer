@@ -331,95 +331,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/addresses/{address}/utxos": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves UTxOs associated with a specific address with pagination.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Addresses"
-                ],
-                "summary": "Get UTxOs by Address",
-                "operationId": "getUTxOsByAddress",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The address to retrieve UTxOs for.",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 100,
-                        "description": "Maximum number of results to return.",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of results to skip.",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved UTxOs.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.Transaction"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid address or pagination parameters.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Address not found or no UTxOs found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/assets/{asset_fingerprint}/addresses": {
+        "/assets/fingerprint/{asset_fingerprint}/addresses": {
             "get": {
                 "security": [
                     {
@@ -441,7 +353,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The asset fingerprint (hex-encoded) to retrieve addresses for.",
+                        "description": "The asset fingerprint to retrieve addresses for.",
                         "name": "asset_fingerprint",
                         "in": "path",
                         "required": true
@@ -507,389 +419,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/assets/{asset_fingerprint}/utxos": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieve a list of UTxOs containing a specific asset fingerprint, with support for pagination.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Assets"
-                ],
-                "summary": "Get UTxOs by Asset Fingerprint",
-                "operationId": "getUTxOsByAssetFingerprint",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The asset fingerprint (hex-encoded) to retrieve UTxOs for.",
-                        "name": "asset_fingerprint",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 100,
-                        "description": "Maximum number of results to return.",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of results to skip.",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved UTxOs.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.SimpleUTxO"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid asset fingerprint or pagination parameters.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Asset fingerprint not found or no UTxOs found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/datums/{datum_hash}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieve details of a specific datum by its hash.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Datums"
-                ],
-                "summary": "Get Datum by Hash",
-                "operationId": "getDatumByHash",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The datum hash (hex-encoded) to retrieve.",
-                        "name": "datum_hash",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved datum.",
-                        "schema": {
-                            "$ref": "#/definitions/viewmodel.Datum"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid datum hash.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Datum not found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/datums/{datum_hash}/transactions": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves a list of transactions that reference a specific datum hash.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Datums"
-                ],
-                "summary": "Get Transactions by Datum Hash",
-                "operationId": "getTransactionsByDatumHash",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The datum hash (hex-encoded) to retrieve transactions for.",
-                        "name": "datum_hash",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved transactions.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.Transaction"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid datum hash.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Datum hash not found or no transactions found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/indexer/addresses/{address}/utxos/inputs": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves transaction inputs for a given address with pagination.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Addresses"
-                ],
-                "summary": "Get UTXO Inputs by Address",
-                "operationId": "getUTxOsInputsByAddress",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The address to retrieve UTXO inputs for.",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 100,
-                        "description": "Maximum number of results to return.",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of results to skip.",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved UTXO inputs.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.TransactionInput"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid address or pagination parameters.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Address not found or no UTXO inputs found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/indexer/addresses/{address}/utxos/outputs": {
-            "get": {
-                "description": "Retrieves transaction outputs for a given address with pagination.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Addresses"
-                ],
-                "summary": "Get UTXO Outputs by Address",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Address to retrieve UTXO outputs for",
-                        "name": "address",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 100,
-                        "description": "Maximum number of results to return",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of results to skip",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.TransactionOutput"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ServerError"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ServerError"
-                        }
-                    }
-                }
-            }
-        },
-        "/indexer/assets/fingerprint/{asset_fingerprint}/transactions": {
+        "/assets/fingerprint/{asset_fingerprint}/transactions": {
             "get": {
                 "security": [
                     {
@@ -977,7 +507,92 @@ const docTemplate = `{
                 }
             }
         },
-        "/indexer/assets/policy/{policyId}/token/{tokenname}/transactions": {
+        "/assets/fingerprint/{asset_fingerprint}/utxos": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of UTxOs containing a specific asset fingerprint, with support for pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Assets"
+                ],
+                "summary": "Get UTxOs by Asset Fingerprint",
+                "operationId": "getUTxOsByAssetFingerprint",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The asset fingerprint to retrieve UTxOs for.",
+                        "name": "asset_fingerprint",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Maximum number of results to return.",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of results to skip.",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved UTxOs.",
+                        "schema": {
+                            "$ref": "#/definitions/viewmodel.TransactionUTxOs"
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid asset fingerprint or pagination parameters.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Asset fingerprint not found or no UTxOs found.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/assets/policy/{policyId}/token/{tokenname}/transactions": {
             "get": {
                 "security": [
                     {
@@ -1072,7 +687,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/indexer/assets/policy/{policyId}/transactions": {
+        "/assets/policy/{policyId}/transactions": {
             "get": {
                 "security": [
                     {
@@ -1160,7 +775,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/indexer/assets/token/{tokenname}/transactions": {
+        "/assets/token/{tokenname}/transactions": {
             "get": {
                 "security": [
                     {
@@ -1248,221 +863,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/indexer/transactions/{block_number}": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves transactions for a given block number with pagination.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get Transactions by Block Number",
-                "operationId": "getTransactionsByBlockNumber",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "The block number to retrieve transactions for.",
-                        "name": "block_number",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 100,
-                        "description": "Maximum number of results to return.",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of results to skip.",
-                        "name": "offset",
-                        "in": "query"
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved transactions.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.Transaction"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid block number or pagination parameters.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Block number not found or no transactions found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/indexer/transactions/{tx_hash}/utxos/inputs": {
-            "get": {
-                "description": "Retrieves transaction inputs for a given transaction hash.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get UTXO Inputs by Transaction Hash",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "Transaction hash to retrieve UTXO inputs for",
-                        "name": "tx_hash",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Success response",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.TransactionInput"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ServerError"
-                        }
-                    },
-                    "404": {
-                        "description": "Transaction not found",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ServerError"
-                        }
-                    },
-                    "500": {
-                        "description": "Server error",
-                        "schema": {
-                            "$ref": "#/definitions/errors.ServerError"
-                        }
-                    }
-                }
-            }
-        },
-        "/indexer/transactions/{tx_hash}/utxos/outputs": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves transaction outputs for a given transaction hash.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get UTXO Outputs by Transaction Hash",
-                "operationId": "getUTxOsOutputsByTransaction",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The transaction hash to retrieve UTXO outputs for.",
-                        "name": "tx_hash",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved UTXO outputs.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.TransactionOutput"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid transaction hash.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Transaction not found or no UTXO outputs found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/metrics/addresses/count": {
             "get": {
                 "security": [
@@ -1470,7 +870,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieves the total number of monitored addresses.",
+                "description": "Retrieves the total number of unique addresses from all transactions in the database.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1480,11 +880,11 @@ const docTemplate = `{
                 "tags": [
                     "Metrics"
                 ],
-                "summary": "Get Total Monitored Addresses Count",
+                "summary": "Get Total Unique Addresses Count",
                 "operationId": "getAddressesCount",
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved addresses count.",
+                        "description": "Successfully retrieved unique addresses count.",
                         "schema": {
                             "type": "object",
                             "properties": {
@@ -1515,7 +915,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieves the total number of indexed assets.",
+                "description": "Retrieves the total number of unique assets from the database.",
                 "consumes": [
                     "application/json"
                 ],
@@ -1525,11 +925,11 @@ const docTemplate = `{
                 "tags": [
                     "Metrics"
                 ],
-                "summary": "Get Total Indexed Assets Count",
+                "summary": "Get Total Unique Assets Count",
                 "operationId": "getAssetsCount",
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved assets count.",
+                        "description": "Successfully retrieved unique assets count.",
                         "schema": {
                             "type": "object",
                             "properties": {
@@ -1628,6 +1028,168 @@ const docTemplate = `{
                             "properties": {
                                 "count": {
                                     "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/redeemers/{tx_hash}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieve a list of redeemers associated with a specific transaction hash.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Redeemers"
+                ],
+                "summary": "Get Redeemers by Transaction Hash",
+                "operationId": "getRedeemersByTxHash",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "The transaction hash (hex-encoded) to retrieve redeemers for.",
+                        "name": "tx_hash",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved redeemers.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/viewmodel.Redeemer"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid transaction hash.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Transaction not found or no redeemers found.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/transactions/by-block-number/{block_number}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves transactions for a given block number with pagination.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Transactions"
+                ],
+                "summary": "Get Transactions by Block Number",
+                "operationId": "getTransactionsByBlockNumber",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "The block number to retrieve transactions for.",
+                        "name": "block_number",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "integer",
+                        "default": 100,
+                        "description": "Maximum number of results to return.",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "default": 0,
+                        "description": "Number of results to skip.",
+                        "name": "offset",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved transactions.",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/viewmodel.Transaction"
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid block number or pagination parameters.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Block number not found or no transactions found.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
                                 }
                             }
                         }
@@ -1812,314 +1374,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/transactions/{tx_hash}/inputs/{input_index}/datum": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves the datum associated with a specific transaction input.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get Datum for Transaction Input",
-                "operationId": "getInputDatum",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The transaction hash (hex-encoded).",
-                        "name": "tx_hash",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "The index of the transaction input.",
-                        "name": "input_index",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved datum.",
-                        "schema": {
-                            "$ref": "#/definitions/viewmodel.Datum"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid transaction hash or input index.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Datum not found for the specified input.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions/{tx_hash}/inputs/{input_index}/redeemer": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves the redeemer associated with a specific transaction input.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get Redeemer for Transaction Input",
-                "operationId": "getInputRedeemer",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The transaction hash (hex-encoded).",
-                        "name": "tx_hash",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "The index of the transaction input.",
-                        "name": "input_index",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved redeemer.",
-                        "schema": {
-                            "$ref": "#/definitions/viewmodel.Redeemer"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid transaction hash or input index.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Redeemer not found for the specified input.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions/{tx_hash}/outputs/{output_index}/datum": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieves the datum associated with a specific transaction output.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get Datum for Transaction Output",
-                "operationId": "getOutputDatum",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The transaction hash (hex-encoded).",
-                        "name": "tx_hash",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "description": "The index of the transaction output.",
-                        "name": "output_index",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved datum.",
-                        "schema": {
-                            "$ref": "#/definitions/viewmodel.Datum"
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid transaction hash or output index.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Datum not found for the specified output.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/transactions/{tx_hash}/redeemers": {
-            "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieve a list of redeemers associated with a specific transaction hash.",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "Transactions"
-                ],
-                "summary": "Get Redeemers by Transaction Hash",
-                "operationId": "getRedeemersByTxHash",
-                "parameters": [
-                    {
-                        "type": "string",
-                        "description": "The transaction hash (hex-encoded) to retrieve redeemers for.",
-                        "name": "tx_hash",
-                        "in": "path",
-                        "required": true
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successfully retrieved redeemers.",
-                        "schema": {
-                            "type": "array",
-                            "items": {
-                                "$ref": "#/definitions/viewmodel.Redeemer"
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid transaction hash.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Transaction not found or no redeemers found.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error.",
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        },
         "/transactions/{tx_hash}/utxos": {
             "get": {
                 "security": [
@@ -2191,14 +1445,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/witnesses/{witness_id}": {
+        "/transactions/{tx_hash}/utxos/inputs": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
-                "description": "Retrieve details of a specific witness by its ID.",
+                "description": "Retrieves transaction inputs for a given transaction hash.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2206,70 +1455,57 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Witnesses"
+                    "Transactions"
                 ],
-                "summary": "Get Witness by ID",
-                "operationId": "getWitnessById",
+                "summary": "Get UTXO Inputs by Transaction Hash",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The witness ID to retrieve.",
-                        "name": "witness_id",
+                        "description": "Transaction hash to retrieve UTXO inputs for",
+                        "name": "tx_hash",
                         "in": "path",
                         "required": true
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved witness.",
+                        "description": "Success response",
                         "schema": {
-                            "$ref": "#/definitions/viewmodel.Witness"
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/viewmodel.TransactionInput"
+                            }
                         }
                     },
                     "400": {
-                        "description": "Invalid witness ID.",
+                        "description": "Bad request",
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/errors.ServerError"
                         }
                     },
                     "404": {
-                        "description": "Witness not found.",
+                        "description": "Transaction not found",
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/errors.ServerError"
                         }
                     },
                     "500": {
-                        "description": "Internal server error.",
+                        "description": "Server error",
                         "schema": {
-                            "type": "object",
-                            "properties": {
-                                "error": {
-                                    "type": "string"
-                                }
-                            }
+                            "$ref": "#/definitions/errors.ServerError"
                         }
                     }
                 }
             }
         },
-        "/witnesses/{witness_id}/transactions": {
+        "/transactions/{tx_hash}/utxos/outputs": {
             "get": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieve a list of transactions that include a specific witness ID, with support for pagination.",
+                "description": "Retrieves transaction outputs for a given transaction hash.",
                 "consumes": [
                     "application/json"
                 ],
@@ -2277,45 +1513,31 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Witnesses"
+                    "Transactions"
                 ],
-                "summary": "Get Transactions by Witness ID",
-                "operationId": "getTransactionsByWitnessId",
+                "summary": "Get UTXO Outputs by Transaction Hash",
+                "operationId": "getUTxOsOutputsByTransaction",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "The witness ID to retrieve transactions for.",
-                        "name": "witness_id",
+                        "description": "The transaction hash to retrieve UTXO outputs for.",
+                        "name": "tx_hash",
                         "in": "path",
                         "required": true
-                    },
-                    {
-                        "type": "integer",
-                        "default": 100,
-                        "description": "Maximum number of results to return.",
-                        "name": "limit",
-                        "in": "query"
-                    },
-                    {
-                        "type": "integer",
-                        "default": 0,
-                        "description": "Number of results to skip.",
-                        "name": "offset",
-                        "in": "query"
                     }
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successfully retrieved transactions.",
+                        "description": "Successfully retrieved UTXO outputs.",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/viewmodel.Transaction"
+                                "$ref": "#/definitions/viewmodel.TransactionOutput"
                             }
                         }
                     },
                     "400": {
-                        "description": "Invalid witness ID or pagination parameters.",
+                        "description": "Invalid transaction hash.",
                         "schema": {
                             "type": "object",
                             "properties": {
@@ -2326,7 +1548,7 @@ const docTemplate = `{
                         }
                     },
                     "404": {
-                        "description": "Witness ID not found or no transactions found.",
+                        "description": "Transaction not found or no UTXO outputs found.",
                         "schema": {
                             "type": "object",
                             "properties": {
@@ -2490,6 +1712,9 @@ const docTemplate = `{
                 "slot_number": {
                     "type": "integer"
                 },
+                "transaction_cbor": {
+                    "type": "string"
+                },
                 "transaction_hash": {
                     "type": "string"
                 },
@@ -2644,7 +1869,7 @@ const docTemplate = `{
 // SwaggerInfo holds exported Swagger Info so clients can modify it
 var SwaggerInfo = &swag.Spec{
 	Version:          "1.0.0",
-	Host:             "0.0.0.0:42069",
+	Host:             "142.132.201.159:42069",
 	BasePath:         "/api/v1/indexer",
 	Schemes:          []string{},
 	Title:            "Andamio Indexer 1.0.0",

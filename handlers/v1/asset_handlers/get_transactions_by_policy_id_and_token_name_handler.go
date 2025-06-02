@@ -25,20 +25,16 @@ import (
 // @Failure		400		{object}	object{error=string}		"Invalid policy ID, token name, or pagination parameters."
 // @Failure		404		{object}	object{error=string}		"Policy ID and token name combination not found or no transactions found."
 // @Failure		500		{object}	object{error=string}		"Internal server error."
-// @Router			/indexer/assets/policy/{policyId}/token/{tokenname}/transactions [get]
+// @Router			/assets/policy/{policyId}/token/{tokenname}/transactions [get]
 func GetTransactionsByPolicyIdAndTokenNameHandler(db *database.Database) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		policyIdStr := c.Params("policyId")
-		policyId, err := hex.DecodeString(policyIdStr)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid policy ID"})
-		}
+		policyId := c.Params("policyId")
 
-		tokenNameStr := c.Params("tokenname")
-		tokenName, err := hex.DecodeString(tokenNameStr)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid token name"})
-		}
+		tokenName := c.Params("tokenname")
+
+		// Debug logging for policyId and tokenName
+		db.Logger().Debug("GetTransactionsByPolicyIdAndTokenNameHandler", "policyId_raw", policyId, "tokenName_raw", tokenName)
+		db.Logger().Debug("GetTransactionsByPolicyIdAndTokenNameHandler", "policyId_bytes_hex", hex.EncodeToString([]byte(policyId)), "tokenName_bytes_hex", hex.EncodeToString([]byte(tokenName)))
 
 		// Get pagination parameters
 		limitStr := c.Query("limit", "100")
@@ -54,16 +50,15 @@ func GetTransactionsByPolicyIdAndTokenNameHandler(db *database.Database) fiber.H
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid offset parameter"})
 		}
 
-		transactions, err := db.Metadata().GetTxsByPolicyIdAndTokenName(nil, policyId, tokenName, limit, offset)
+		transactions, err := db.GetTxsByPolicyIdAndTokenName([]byte(policyId), []byte(tokenName), limit, offset, nil)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get transactions by policy ID and token name"})
 		}
 
-		// Convert database models to view models
 		transactionViewModels := []viewmodel.Transaction{}
 		for _, tx := range transactions {
 			transactionViewModels = append(transactionViewModels, viewmodel.Transaction{
-				TransactionHash: string(tx.TransactionHash),
+				TransactionHash: hex.EncodeToString(tx.TransactionHash),
 				BlockNumber:     tx.BlockNumber,
 				SlotNumber:      tx.SlotNumber,
 				Inputs:          viewmodel.ConvertTransactionInputsToViewModels(tx.Inputs),
@@ -71,11 +66,12 @@ func GetTransactionsByPolicyIdAndTokenNameHandler(db *database.Database) fiber.H
 				Fee:             tx.Fee,
 				TTL:             tx.TTL,
 				BlockHash:       string(tx.BlockHash),
-				Metadata:        string(tx.Metadata), // CBOR string representation
+				Metadata:        hex.EncodeToString(tx.Metadata),
 				ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(tx.ReferenceInputs),
 				Withdrawals:     tx.Withdrawals,
-				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates), // Convert [][]byte to []string
+				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates),
 				Witness:         viewmodel.ConvertWitnessModelToViewModel(tx.Witness),
+				TransactionCBOR: hex.EncodeToString(tx.TransactionCBOR),
 			})
 		}
 

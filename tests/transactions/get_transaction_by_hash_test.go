@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/Andamio-Platform/andamio-indexer/constants"
+	"github.com/Andamio-Platform/andamio-indexer/tests"
 	"github.com/Andamio-Platform/andamio-indexer/viewmodel"
 )
 
@@ -18,7 +18,7 @@ func TestGetTransactionByHash(t *testing.T) {
 	// that you want to specifically test.
 	transactionHash := "YOUR_COMPLEX_TRANSACTION_HASH_HERE" // Replace with a real hash
 
-	url := fmt.Sprintf("%s/transactions/%s", constants.API_BASE_URL, transactionHash)
+	url := fmt.Sprintf("%s/transactions/%s", tests.API_BASE_URL, transactionHash)
 	resp, err := http.Get(url)
 	if err != nil {
 		t.Fatalf("Failed to call GetTransactionByHash API for hash %s: %v", transactionHash, err)

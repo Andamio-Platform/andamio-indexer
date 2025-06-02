@@ -16,7 +16,7 @@ import (
 // @Summary Get Redeemers by Transaction Hash
 // @Description Retrieve a list of redeemers associated with a specific transaction hash.
 // @ID getRedeemersByTxHash
-// @Tags Transactions
+// @Tags Redeemers
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
@@ -25,7 +25,7 @@ import (
 // @Failure 400 {object} object{error=string} "Invalid transaction hash."
 // @Failure 404 {object} object{error=string} "Transaction not found or no redeemers found."
 // @Failure 500 {object} object{error=string} "Internal server error."
-// @Router /transactions/{tx_hash}/redeemers [get]
+// @Router /redeemers/{tx_hash} [get]
 func GetRedeemersByTxHashHandler(db *database.Database, log *slog.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		txHashHex := c.Params("tx_hash")

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/Andamio-Platform/andamio-indexer/constants"
+	"github.com/Andamio-Platform/andamio-indexer/tests"
 	"github.com/Andamio-Platform/andamio-indexer/viewmodel"
 )
 
@@ -15,14 +15,7 @@ func TestGetUTxOsByAddress(t *testing.T) {
 	// Ensure the indexer is running and connected to the testnet.
 	// The setupTestEnvironment function in api_test.go handles starting the indexer and waiting for readiness.
 
-	// Use an address from config.json that is expected to have indexed UTxOs.
-	// This address is associated with "globalStateRefMS" in config.json.
-	testAddress := "addr_test1xp69xmvurx2uesfydnz9ms7huvzafvlejwfna8rer72hlwuke8x9mpjf7aerjt3n3nfd5tnzkfhlprp09mpf4sdy8dzqjte2n7"
-	// The expected UTxO reference from config.json "globalStateRefMS" mSCTxRef.
-	expectedTxHash := "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7"
-	expectedIndex := uint32(1) // Index is 1 based on "4df3ebc0592b39124c5cc3a1cf680a5d7ac393531dd308e34ee499fbad7257e7#1"
-
-	endpoint := fmt.Sprintf("%s/addresses/%s/utxos", constants.API_BASE_URL, testAddress)
+	endpoint := fmt.Sprintf("%s/addresses/%s/utxos", tests.API_BASE_URL, tests.TEST_ADDRESS)
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		t.Fatalf("Failed to send GET request to %s: %v", endpoint, err)
@@ -41,13 +34,13 @@ func TestGetUTxOsByAddress(t *testing.T) {
 
 	// Validate the response data
 	if len(utxos) == 0 {
-		t.Fatalf("Expected to receive UTxOs for address %s, but got an empty list", testAddress)
+		t.Fatalf("Expected to receive UTxOs for address %s, but got an empty list", tests.TEST_ADDRESS)
 	}
 
 	// Check if the expected UTxO is present in the list
 	foundExpectedUTxO := false
 	for _, utxo := range utxos {
-		if string(utxo.TransactionHash) == expectedTxHash && utxo.UTxOIDIndex == expectedIndex {
+		if string(utxo.TransactionHash) == tests.EXPECTED_TX_HASH && utxo.UTxOIDIndex == tests.EXPECTED_INDEX {
 			foundExpectedUTxO = true
 			// Optional: Add more specific validation for this UTxO if needed,
 			// e.g., checking amount, datum hash, or inline datum if known.
@@ -59,8 +52,8 @@ func TestGetUTxOsByAddress(t *testing.T) {
 
 	if !foundExpectedUTxO {
 		t.Errorf("Expected UTxO with TxHash %s and Index %d not found for address %s",
-			expectedTxHash, expectedIndex, testAddress)
+			tests.EXPECTED_TX_HASH, tests.EXPECTED_INDEX, tests.TEST_ADDRESS)
 	}
 
-	t.Logf("Successfully retrieved and validated UTxOs for address %s. Found %d UTxOs.", testAddress, len(utxos))
+	t.Logf("Successfully retrieved and validated UTxOs for address %s. Found %d UTxOs.", tests.TEST_ADDRESS, len(utxos))
 }

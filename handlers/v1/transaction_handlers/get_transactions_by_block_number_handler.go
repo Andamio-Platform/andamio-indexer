@@ -1,6 +1,7 @@
 package transaction_handlers
 
 import (
+	"encoding/hex"
 	"strconv"
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
@@ -23,7 +24,7 @@ import (
 // @Failure		400		{object}	object{error=string}		"Invalid block number or pagination parameters."
 // @Failure		404		{object}	object{error=string}		"Block number not found or no transactions found."
 // @Failure		500		{object}	object{error=string}		"Internal server error."
-// @Router			/indexer/transactions/{block_number} [get]
+// @Router			/transactions/by-block-number/{block_number} [get]
 func GetTransactionsByBlockNumberHandler(db *database.Database) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		blockNumberStr := c.Params("block_number")
@@ -46,7 +47,7 @@ func GetTransactionsByBlockNumberHandler(db *database.Database) fiber.Handler {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid offset parameter"})
 		}
 
-		transactions, err := db.Metadata().GetTxsByBlockNumber(nil, blockNumber, limit, offset)
+		transactions, err := db.GetTxsByBlockNumber(blockNumber, limit, offset, nil)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get transactions by block number"})
 		}
@@ -55,7 +56,7 @@ func GetTransactionsByBlockNumberHandler(db *database.Database) fiber.Handler {
 		transactionViewModels := []viewmodel.Transaction{}
 		for _, tx := range transactions {
 			transactionViewModels = append(transactionViewModels, viewmodel.Transaction{
-				TransactionHash: string(tx.TransactionHash),
+				TransactionHash: hex.EncodeToString(tx.TransactionHash),
 				BlockNumber:     tx.BlockNumber,
 				SlotNumber:      tx.SlotNumber,
 				Inputs:          viewmodel.ConvertTransactionInputsToViewModels(tx.Inputs),
@@ -63,11 +64,12 @@ func GetTransactionsByBlockNumberHandler(db *database.Database) fiber.Handler {
 				Fee:             tx.Fee,
 				TTL:             tx.TTL,
 				BlockHash:       string(tx.BlockHash),
-				Metadata:        string(tx.Metadata), // CBOR string representation
+				Metadata:        hex.EncodeToString(tx.Metadata),
 				ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(tx.ReferenceInputs),
 				Withdrawals:     tx.Withdrawals,
-				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates), // Convert [][]byte to []string
+				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates),
 				Witness:         viewmodel.ConvertWitnessModelToViewModel(tx.Witness),
+				TransactionCBOR: hex.EncodeToString(tx.TransactionCBOR),
 			})
 		}
 

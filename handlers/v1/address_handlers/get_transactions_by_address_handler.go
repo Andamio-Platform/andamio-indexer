@@ -1,6 +1,7 @@
 package address_handlers
 
 import (
+	"encoding/hex"
 	"strconv"
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
@@ -50,9 +51,9 @@ func GetTransactionsByAddressHandler(db *database.Database) fiber.Handler {
 		}
 
 		// Use the database function with pagination
-		transactions, err := db.Metadata().GetTxsByAnyAddress(nil, address, limit, offset)
+		transactions, err := db.GetTxsByAnyAddress(address, limit, offset, nil)
 		if err != nil {
-			fiberLogger.Errorf("FaGetTransactionsBySlotRangeHandleriled to get transactions for address %s: %v", address, err)
+			fiberLogger.Errorf("Failed to get transactions for address %s: %v", address, err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to get transactions"})
 		}
 
@@ -65,7 +66,7 @@ func GetTransactionsByAddressHandler(db *database.Database) fiber.Handler {
 		transactionViewModels := []viewmodel.Transaction{}
 		for _, tx := range transactions {
 			transactionViewModels = append(transactionViewModels, viewmodel.Transaction{
-				TransactionHash: string(tx.TransactionHash),
+				TransactionHash: hex.EncodeToString(tx.TransactionHash),
 				BlockNumber:     tx.BlockNumber,
 				SlotNumber:      tx.SlotNumber,
 				Inputs:          viewmodel.ConvertTransactionInputsToViewModels(tx.Inputs),
@@ -73,11 +74,12 @@ func GetTransactionsByAddressHandler(db *database.Database) fiber.Handler {
 				Fee:             tx.Fee,
 				TTL:             tx.TTL,
 				BlockHash:       string(tx.BlockHash),
-				Metadata:        string(tx.Metadata), // CBOR string representation
+				Metadata:        hex.EncodeToString(tx.Metadata),
 				ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(tx.ReferenceInputs),
 				Withdrawals:     tx.Withdrawals,
-				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates), // Convert [][]byte to []string
+				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates),
 				Witness:         viewmodel.ConvertWitnessModelToViewModel(tx.Witness),
+				TransactionCBOR: hex.EncodeToString(tx.TransactionCBOR),
 			})
 		}
 

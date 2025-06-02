@@ -20,7 +20,6 @@ import (
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 
 	"fmt"
-	"io"
 	"io/fs"
 	"log/slog"
 	"os"
@@ -51,7 +50,6 @@ type MetadataStoreSqlite struct {
 	db          *gorm.DB
 	logger      *slog.Logger
 	timerVacuum *time.Timer
-
 }
 
 // New creates a new database
@@ -131,7 +129,7 @@ func (d *MetadataStoreSqlite) init() error {
 	if d.logger == nil {
 		// Create logger to throw away logs
 		// We do this so we don't have to add guards around every log operation
-		d.logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
+		d.logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	}
 	// Configure tracing for GORM
 	if err := d.db.Use(tracing.NewPlugin(tracing.WithoutMetrics())); err != nil {

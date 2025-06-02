@@ -33,7 +33,7 @@ func (d *MetadataStoreSqlite) GetWitnessByTransactionHash(txn *gorm.DB, transact
 		db = d.db
 	}
 	var witness models.Witness
-	result := db.Where("transaction_hash = ?", transactionHash).First(&witness)
+	result := db.Where("transaction_hash = ?", transactionHash).Preload("Redeemers").First(&witness)
 	if result.Error != nil {
 		if result.Error == gorm.ErrRecordNotFound {
 			return nil, nil // Return nil Witness and nil error if not found

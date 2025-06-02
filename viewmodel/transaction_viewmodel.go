@@ -17,6 +17,7 @@ type Transaction struct {
 	Withdrawals     map[string]uint64   `json:"withdrawals"`
 	Witness         Witness             `json:"witness"`
 	Certificates    []string            `json:"certificates"` // Slice of CBOR string representations
+	TransactionCBOR string              `json:"transaction_cbor"`
 }
 
 // IsValid performs validation on the Transaction view model.

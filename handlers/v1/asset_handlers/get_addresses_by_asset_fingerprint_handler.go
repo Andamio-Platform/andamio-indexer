@@ -18,26 +18,21 @@ import (
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Param asset_fingerprint path string true "The asset fingerprint (hex-encoded) to retrieve addresses for."
+// @Param asset_fingerprint path string true "The asset fingerprint to retrieve addresses for."
 // @Param limit query int false "Maximum number of results to return." default(100)
 // @Param offset query int false "Number of results to skip." default(0)
 // @Success 200 {array} string "Successfully retrieved addresses."
 // @Failure 400 {object} object{error=string} "Invalid asset fingerprint or pagination parameters."
 // @Failure 404 {object} object{error=string} "Asset fingerprint not found or no addresses found."
 // @Failure 500 {object} object{error=string} "Internal server error."
-// @Router /assets/{asset_fingerprint}/addresses [get]
+// @Router /assets/fingerprint/{asset_fingerprint}/addresses [get]
 func GetAddressesByAssetFingerprintHandler(db *database.Database, logger *slog.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		assetFingerprintHex := c.Params("asset_fingerprint")
-		if assetFingerprintHex == "" {
+		assetFingerprint := c.Params("asset_fingerprint")
+		logger.Info("Received asset_fingerprint", "asset_fingerprint", assetFingerprint)
+		if assetFingerprint == "" {
 			logger.Error("asset_fingerprint path parameter is missing")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "asset_fingerprint path parameter is missing"})
-		}
-
-		assetFingerprint, err := hex.DecodeString(assetFingerprintHex)
-		if err != nil {
-			logger.Error("invalid asset_fingerprint hex encoding", "error", err)
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid asset_fingerprint hex encoding"})
 		}
 
 		limit := c.QueryInt("limit", 100)
@@ -49,13 +44,16 @@ func GetAddressesByAssetFingerprintHandler(db *database.Database, logger *slog.L
 		}
 
 		var assets []models.Asset
+		fingerprintBytes := []byte(assetFingerprint)
+		logger.Info("Querying with fingerprint bytes", "fingerprint_bytes", fingerprintBytes)
 		result := db.Metadata().DB().Model(&models.Asset{}).
-			Where("fingerprint = ?", assetFingerprint).
+			Where("fingerprint = ?", fingerprintBytes).
 			Limit(limit).Offset(offset).
 			Find(&assets)
 
+		logger.Info("Database query result", "rows_affected", result.RowsAffected, "error", result.Error)
 		if result.Error != nil {
-			logger.Error("failed to get assets by fingerprint", "asset_fingerprint", assetFingerprintHex, "error", result.Error)
+			logger.Error("failed to get assets by fingerprint", "asset_fingerprint", assetFingerprint, "error", result.Error)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to retrieve addresses"})
 		}
 
@@ -67,14 +65,34 @@ func GetAddressesByAssetFingerprintHandler(db *database.Database, logger *slog.L
 		addressMap := make(map[string]bool)
 		var addresses []string
 		for _, asset := range assets {
+			logger.Debug("Attempting to retrieve transaction output for asset", "asset_utxo_id", hex.EncodeToString(asset.UTxOID), "asset_utxo_index", asset.UTxOIDIndex)
+			var address string
 			output, err := db.Metadata().GetTxOutputByUTxO(nil, asset.UTxOID, asset.UTxOIDIndex)
 			if err != nil {
-				// Log the error but continue processing other assets
-				logger.Error("failed to get transaction output for asset", "utxo_id", asset.UTxOID, "utxo_index", asset.UTxOIDIndex, "error", err)
+				logger.Error("failed to get transaction output for asset", "utxo_id", hex.EncodeToString(asset.UTxOID), "utxo_index", asset.UTxOIDIndex, "error", err)
 				continue
 			}
 			if output != nil {
-				address := string(output.Address)
+				logger.Debug("Successfully retrieved transaction output", "output_id", output.ID, "output_address", string(output.Address))
+				address = string(output.Address)
+			} else {
+				logger.Debug("Transaction output not found for asset, checking transaction inputs", "asset_utxo_id", hex.EncodeToString(asset.UTxOID), "asset_utxo_index", asset.UTxOIDIndex)
+				input, err := db.Metadata().GetTxInputByUTxO(nil, asset.UTxOID, asset.UTxOIDIndex)
+				if err != nil {
+					logger.Error("failed to get transaction input for asset", "utxo_id", hex.EncodeToString(asset.UTxOID), "utxo_index", asset.UTxOIDIndex, "error", err)
+					continue
+				}
+				if input != nil {
+					logger.Debug("Successfully retrieved transaction input", "input_id", input.ID, "input_address", string(input.Address))
+					address = string(input.Address)
+				} else {
+					logger.Debug("Transaction input not found for asset", "asset_utxo_id", hex.EncodeToString(asset.UTxOID), "asset_utxo_index", asset.UTxOIDIndex)
+					continue
+				}
+			}
+
+			if address != "" {
+				logger.Debug("Found address for asset", "address", address)
 				if _, ok := addressMap[address]; !ok {
 					addressMap[address] = true
 					addresses = append(addresses, address)

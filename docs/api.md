@@ -50,7 +50,7 @@ Adds a new address to the indexer for monitoring transactions and UTxOs.
 
 Removes an address from the tracking list.
 
-*   **URL:** `/addresses`
+*   **URL:** `/addresses/remove-address`
 *   **Method:** `DELETE`
 *   **Description:** Removes an address from the tracking list.
 *   **Request Body:**
@@ -150,49 +150,13 @@ Retrieves transactions associated with a specific address with pagination.
             }
             ```
 
-#### Get UTxOs by Address
-
-Retrieves UTxOs associated with a specific address with pagination.
-
-*   **URL:** `/addresses/{address}/utxos`
-*   **Method:** `GET`
-*   **Description:** Retrieves UTxOs associated with a specific address with pagination.
-*   **Parameters:**
-    *   `address` (required, path): The address to retrieve UTxOs for. (string)
-    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
-    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
-*   **Responses:**
-    *   `200 OK`: Successfully retrieved UTxOs.
-        *   Schema: Array of `viewmodel.Transaction`
-    *   `400 Bad Request`: Invalid address or pagination parameters.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `404 Not Found`: Address not found or no UTxOs found.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `500 Internal Server Error`: Internal server error.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-
 ### Assets
 
 #### Get Addresses by Asset Fingerprint
 
 Retrieve a list of addresses that hold a specific asset fingerprint, with support for pagination.
 
-*   **URL:** `/assets/{asset_fingerprint}/addresses`
+*   **URL:** `/assets/fingerprint/{asset_fingerprint}/addresses`
 *   **Method:** `GET`
 *   **Description:** Retrieve a list of addresses that hold a specific asset fingerprint, with support for pagination.
 *   **Parameters:**
@@ -228,7 +192,7 @@ Retrieve a list of addresses that hold a specific asset fingerprint, with suppor
 
 Retrieves UTxOs associated with a specific asset fingerprint with pagination.
 
-*   **URL:** `/assets/{asset_fingerprint}/utxos`
+*   **URL:** `/assets/fingerprint/{asset_fingerprint}/utxos`
 *   **Method:** `GET`
 *   **Description:** Retrieves UTxOs associated with a specific asset fingerprint with pagination.
 *   **Parameters:**
@@ -260,157 +224,11 @@ Retrieves UTxOs associated with a specific asset fingerprint with pagination.
             }
             ```
 
-### Datums
-
-#### Get Datum by Hash
-
-Retrieves a datum by its hash.
-
-*   **URL:** `/datums/{datum_hash}`
-*   **Method:** `GET`
-*   **Description:** Retrieves a datum by its hash.
-*   **Parameters:**
-    *   `datum_hash` (required, path): The hash of the datum to retrieve. (string)
-*   **Responses:**
-    *   `200 OK`: Successfully retrieved datum.
-        *   Schema: `viewmodel.Datum`
-    *   `400 Bad Request`: Invalid datum hash.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `404 Not Found`: Datum not found.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `500 Internal Server Error`: Internal server error.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-
-#### Get Transactions by Datum Hash
-
-Retrieves transactions associated with a specific datum hash with pagination.
-
-*   **URL:** `/datums/{datum_hash}/transactions`
-*   **Method:** `GET`
-*   **Description:** Retrieves transactions associated with a specific datum hash with pagination.
-*   **Parameters:**
-    *   `datum_hash` (required, path): The hash of the datum to retrieve transactions for. (string)
-    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
-    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
-*   **Responses:**
-    *   `200 OK`: Successfully retrieved transactions.
-        *   Schema: Array of `viewmodel.Transaction`
-    *   `400 Bad Request`: Invalid datum hash or pagination parameters.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `404 Not Found`: Datum hash not found or no transactions found.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `500 Internal Server Error`: Internal server error.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-
-### Indexer
-
-#### Get UTxOs Inputs by Address
-
-Retrieves transaction inputs associated with a specific address with pagination.
-
-*   **URL:** `/indexer/addresses/{address}/utxos/inputs`
-*   **Method:** `GET`
-*   **Description:** Retrieves transaction inputs associated with a specific address with pagination.
-*   **Parameters:**
-    *   `address` (required, path): The address to retrieve transaction inputs for. (string)
-    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
-    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
-*   **Responses:**
-    *   `200 OK`: Successfully retrieved transaction inputs.
-        *   Schema: Array of `viewmodel.TransactionInput`
-    *   `400 Bad Request`: Invalid address or pagination parameters.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `404 Not Found`: Address not found or no transaction inputs found.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `500 Internal Server Error`: Internal server error.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-
-#### Get UTxOs Outputs by Address
-
-Retrieves transaction outputs associated with a specific address with pagination.
-
-*   **URL:** `/indexer/addresses/{address}/utxos/outputs`
-*   **Method:** `GET`
-*   **Description:** Retrieves transaction outputs associated with a specific address with pagination.
-*   **Parameters:**
-    *   `address` (required, path): The address to retrieve transaction outputs for. (string)
-    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
-    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
-*   **Responses:**
-    *   `200 OK`: Successfully retrieved transaction outputs.
-        *   Schema: Array of `viewmodel.TransactionOutput`
-    *   `400 Bad Request`: Invalid address or pagination parameters.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `404 Not Found`: Address not found or no transaction outputs found.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-    *   `500 Internal Server Error`: Internal server error.
-        *   Schema:
-            ```json
-            {
-              "error": "string"
-            }
-            ```
-
 #### Get Transactions by Asset Fingerprint
 
 Retrieves transactions associated with a specific asset fingerprint with pagination.
 
-*   **URL:** `/indexer/assets/fingerprint/{asset_fingerprint}/transactions`
+*   **URL:** `/assets/fingerprint/{asset_fingerprint}/transactions`
 *   **Method:** `GET`
 *   **Description:** Retrieves transactions associated with a specific asset fingerprint with pagination.
 *   **Parameters:**
@@ -446,7 +264,7 @@ Retrieves transactions associated with a specific asset fingerprint with paginat
 
 Retrieves transactions associated with a specific policy ID and token name with pagination.
 
-*   **URL:** `/indexer/assets/policy/{policyId}/token/{tokenname}/transactions`
+*   **URL:** `/assets/policy/{policyId}/token/{tokenname}/transactions`
 *   **Method:** `GET`
 *   **Description:** Retrieves transactions associated with a specific policy ID and token name with pagination.
 *   **Parameters:**
@@ -483,7 +301,7 @@ Retrieves transactions associated with a specific policy ID and token name with 
 
 Retrieves transactions associated with a specific policy ID with pagination.
 
-*   **URL:** `/indexer/assets/policy/{policyId}/transactions`
+*   **URL:** `/assets/policy/{policyId}/transactions`
 *   **Method:** `GET`
 *   **Description:** Retrieves transactions associated with a specific policy ID with pagination.
 *   **Parameters:**
@@ -519,7 +337,7 @@ Retrieves transactions associated with a specific policy ID with pagination.
 
 Retrieves transactions associated with a specific token name with pagination.
 
-*   **URL:** `/indexer/assets/token/{tokenname}/transactions`
+*   **URL:** `/assets/token/{tokenname}/transactions`
 *   **Method:** `GET`
 *   **Description:** Retrieves transactions associated with a specific token name with pagination.
 *   **Parameters:**
@@ -551,11 +369,47 @@ Retrieves transactions associated with a specific token name with pagination.
             }
             ```
 
+### Transactions
+
+#### Get Transaction by Tx Hash
+
+Retrieves a transaction by its hash.
+
+*   **URL:** `/transactions/{tx_hash}`
+*   **Method:** `GET`
+*   **Description:** Retrieves a transaction by its hash.
+*   **Parameters:**
+    *   `tx_hash` (required, path): The hash of the transaction to retrieve. (string)
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved transaction.
+        *   Schema: `viewmodel.Transaction`
+    *   `400 Bad Request`: Invalid transaction hash.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `404 Not Found`: Transaction not found.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
 #### Get Transactions by Block Number
 
 Retrieves transactions associated with a specific block number with pagination.
 
-*   **URL:** `/indexer/transactions/{block_number}`
+*   **URL:** `/transactions/by-block-number/{block_number}`
 *   **Method:** `GET`
 *   **Description:** Retrieves transactions associated with a specific block number with pagination.
 *   **Parameters:**
@@ -567,4 +421,298 @@ Retrieves transactions associated with a specific block number with pagination.
         *   Schema: Array of `viewmodel.Transaction`
     *   `400 Bad Request`: Invalid block number or pagination parameters.
         *   Schema:
-            ```json>
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `404 Not Found`: Block number not found or no transactions found.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+#### Get Transactions by Slot Range
+
+Retrieves transactions within a specific slot range with pagination.
+
+*   **URL:** `/transactions/by-slot-range`
+*   **Method:** `GET`
+*   **Description:** Retrieves transactions within a specific slot range with pagination.
+*   **Parameters:**
+    *   `from_slot` (required, query): The starting slot number. (integer)
+    *   `to_slot` (required, query): The ending slot number. (integer)
+    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
+    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved transactions.
+        *   Schema: Array of `viewmodel.Transaction`
+    *   `400 Bad Request`: Invalid slot range or pagination parameters.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `404 Not Found`: No transactions found in the specified slot range.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+#### Get UTxOs by Transaction
+
+Retrieves UTxOs associated with a specific transaction hash.
+
+*   **URL:** `/transactions/{tx_hash}/utxos`
+*   **Method:** `GET`
+*   **Description:** Retrieves UTxOs associated with a specific transaction hash.
+*   **Parameters:**
+    *   `tx_hash` (required, path): The hash of the transaction to retrieve UTxOs for. (string)
+    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
+    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved UTxOs.
+        *   Schema: Array of `viewmodel.SimpleUTxO`
+    *   `400 Bad Request`: Invalid transaction hash or pagination parameters.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `404 Not Found`: Transaction not found or no UTxOs found.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+#### Get UTxOs Inputs by Transaction
+
+Retrieves transaction inputs associated with a specific transaction hash.
+
+*   **URL:** `/transactions/{tx_hash}/utxos/inputs`
+*   **Method:** `GET`
+*   **Description:** Retrieves transaction inputs associated with a specific transaction hash.
+*   **Parameters:**
+    *   `tx_hash` (required, path): The hash of the transaction to retrieve inputs for. (string)
+    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
+    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved transaction inputs.
+        *   Schema: Array of `viewmodel.TransactionInput`
+    *   `400 Bad Request`: Invalid transaction hash or pagination parameters.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `404 Not Found`: Transaction not found or no inputs found.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+#### Get UTxOs Outputs by Transaction
+
+Retrieves transaction outputs associated with a specific transaction hash.
+
+*   **URL:** `/transactions/{tx_hash}/utxos/outputs`
+*   **Method:** `GET`
+*   **Description:** Retrieves transaction outputs associated with a specific transaction hash.
+*   **Parameters:**
+    *   `tx_hash` (required, path): The hash of the transaction to retrieve outputs for. (string)
+    *   `limit` (optional, query): Maximum number of results to return. (integer, default: 100)
+    *   `offset` (optional, query): Number of results to skip. (integer, default: 0)
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved transaction outputs.
+        *   Schema: Array of `viewmodel.TransactionOutput`
+    *   `400 Bad Request`: Invalid transaction hash or pagination parameters.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `404 Not Found`: Transaction not found or no outputs found.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+### Metrics
+
+#### Get Addresses Count
+
+Retrieves the total count of addresses in the indexer.
+
+*   **URL:** `/metrics/addresses/count`
+*   **Method:** `GET`
+*   **Description:** Retrieves the total count of addresses in the indexer.
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved addresses count.
+        *   Schema:
+            ```json
+            {
+              "count": "integer"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+#### Get Assets Count
+
+Retrieves the total count of assets in the indexer.
+
+*   **URL:** `/metrics/assets/count`
+*   **Method:** `GET`
+*   **Description:** Retrieves the total count of assets in the indexer.
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved assets count.
+        *   Schema:
+            ```json
+            {
+              "count": "integer"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+#### Get Latest Block
+
+Retrieves information about the latest block indexed.
+
+*   **URL:** `/metrics/latest-block`
+*   **Method:** `GET`
+*   **Description:** Retrieves information about the latest block indexed.
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved latest block information.
+        *   Schema:
+            ```json
+            {
+              "block_number": "integer",
+              "slot": "integer",
+              "hash": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+#### Get Transactions Count
+
+Retrieves the total count of transactions in the indexer.
+
+*   **URL:** `/metrics/transactions/count`
+*   **Method:** `GET`
+*   **Description:** Retrieves the total count of transactions in the indexer.
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved transactions count.
+        *   Schema:
+            ```json
+            {
+              "count": "integer"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+
+### Redeemers
+
+#### Get Redeemer by Tx Hash
+
+Retrieves a redeemer by its transaction hash.
+
+*   **URL:** `/redeemers/{tx_hash}`
+*   **Method:** `GET`
+*   **Description:** Retrieves a redeemer by its transaction hash.
+*   **Parameters:**
+    *   `tx_hash` (required, path): The hash of the transaction to retrieve the redeemer for. (string)
+*   **Responses:**
+    *   `200 OK`: Successfully retrieved redeemer.
+        *   Schema: `viewmodel.Redeemer`
+    *   `400 Bad Request`: Invalid transaction hash.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `404 Not Found`: Redeemer not found.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }
+            ```
+    *   `500 Internal Server Error`: Internal server error.
+        *   Schema:
+            ```json
+            {
+              "error": "string"
+            }

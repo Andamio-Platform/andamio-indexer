@@ -1,6 +1,8 @@
 package viewmodel
 
 import (
+	"encoding/hex"
+
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 )
 
@@ -9,15 +11,13 @@ func ConvertTransactionInputsToViewModels(inputs []models.TransactionInput) []Tr
 	inputViewModels := []TransactionInput{}
 	for _, input := range inputs {
 		inputViewModels = append(inputViewModels, TransactionInput{
-			TransactionHash: string(input.TransactionHash),
-			UTxOID:          string(input.UTxOID),
+			TransactionHash: hex.EncodeToString(input.TransactionHash),
+			UTxOID:          hex.EncodeToString(input.UTxOID),
 			UTxOIDIndex:     input.UTxOIDIndex,
 			Address:         string(input.Address),
 			Amount:          input.Amount,
-			Cbor:            string(input.Cbor), // CBOR string representation
-			// Convert nested Asset models to view models
+			Cbor:            hex.EncodeToString(input.Cbor),
 			Asset: ConvertAssetModelsToViewModels(input.Asset),
-			// Convert nested Datum model to view model
 			Datum: ConvertDatumModelToViewModel(input.Datum),
 		})
 	}
@@ -29,14 +29,12 @@ func ConvertTransactionOutputsToViewModels(outputs []models.TransactionOutput) [
 	outputViewModels := []TransactionOutput{}
 	for _, output := range outputs {
 		outputViewModels = append(outputViewModels, TransactionOutput{
-			UTxOID:      string(output.UTxOID),
+			UTxOID:      hex.EncodeToString(output.UTxOID),
 			UTxOIDIndex: output.UTxOIDIndex,
 			Address:     string(output.Address),
 			Amount:      output.Amount,
-			Cbor:        string(output.Cbor), // CBOR string representation
-			// Convert nested Asset models to view models
+			Cbor:        hex.EncodeToString(output.Cbor),
 			Asset: ConvertAssetModelsToViewModels(output.Asset),
-			// Convert nested Datum model to view model
 			Datum: ConvertDatumModelToViewModel(output.Datum),
 		})
 	}
@@ -48,7 +46,7 @@ func ConvertAssetModelsToViewModels(assets []models.Asset) []Asset {
 	assetViewModels := []Asset{}
 	for _, asset := range assets {
 		assetViewModels = append(assetViewModels, Asset{
-			UTxOID:      string(asset.UTxOID),
+			UTxOID:      hex.EncodeToString(asset.UTxOID),
 			UTxOIDIndex: asset.UTxOIDIndex,
 			Name:        string(asset.Name),
 			NameHex:     string(asset.NameHex),
@@ -63,10 +61,10 @@ func ConvertAssetModelsToViewModels(assets []models.Asset) []Asset {
 // Helper function to convert a models.Datum to a viewmodel.Datum
 func ConvertDatumModelToViewModel(datum models.Datum) Datum {
 	return Datum{
-		UTxOID:      string(datum.UTxOID),
+		UTxOID:      hex.EncodeToString(datum.UTxOID),
 		UTxOIDIndex: datum.UTxOIDIndex,
-		DatumHash:   string(datum.DatumHash),
-		DatumCbor:   string(datum.DatumCbor), // Assuming DatumCbor should be a string representation of CBOR
+		DatumHash:   hex.EncodeToString(datum.DatumHash),
+		DatumCbor:   hex.EncodeToString(datum.DatumCbor), // Assuming DatumCbor should be a string representation of CBOR
 	}
 }
 
@@ -75,8 +73,8 @@ func ConvertSimpleUTxOModelsToViewModels(utxos []models.SimpleUTxO) []SimpleUTxO
 	utxoViewModels := []SimpleUTxO{}
 	for _, utxo := range utxos {
 		utxoViewModels = append(utxoViewModels, SimpleUTxO{
-			TransactionHash: string(utxo.TransactionHash),
-			UTxOID:          string(utxo.UTxOID),
+			TransactionHash: hex.EncodeToString(utxo.TransactionHash),
+			UTxOID:          hex.EncodeToString(utxo.UTxOID),
 			UTxOIDIndex:     utxo.UTxOIDIndex,
 		})
 	}
@@ -88,10 +86,10 @@ func ConvertRedeemersToViewModels(redeemers []models.Redeemer) []Redeemer {
 	redeemerViewModels := []Redeemer{}
 	for _, redeemer := range redeemers {
 		redeemerViewModels = append(redeemerViewModels, Redeemer{
-			TransactionHash: string(redeemer.TransactionHash),
+			TransactionHash: hex.EncodeToString(redeemer.TransactionHash),
 			Index:           redeemer.Index,
 			Tag:             redeemer.Tag,
-			Cbor:            string(redeemer.Cbor), // CBOR string representation
+			Cbor:            hex.EncodeToString(redeemer.Cbor), // CBOR string representation
 		})
 	}
 	return redeemerViewModels
@@ -100,11 +98,11 @@ func ConvertRedeemersToViewModels(redeemers []models.Redeemer) []Redeemer {
 // Helper function to convert a models.Witness to a viewmodel.Witness
 func ConvertWitnessModelToViewModel(witness models.Witness) Witness {
 	return Witness{
-		TransactionHash: string(witness.TransactionHash),
-		PlutusData:      ConvertByteSliceSliceToStringSlice(witness.PlutusData),      // Convert [][]byte to []string
-		PlutusV1Scripts: ConvertByteSliceSliceToStringSlice(witness.PlutusV1Scripts), // Convert [][]byte to []string
-		PlutusV2Scripts: ConvertByteSliceSliceToStringSlice(witness.PlutusV2Scripts), // Convert [][]byte to []string
-		PlutusV3Scripts: ConvertByteSliceSliceToStringSlice(witness.PlutusV3Scripts), // Convert [][]byte to []string
+		TransactionHash: hex.EncodeToString(witness.TransactionHash),
+		PlutusData:      ConvertByteSliceSliceToStringSlice(witness.PlutusData),
+		PlutusV1Scripts: ConvertByteSliceSliceToStringSlice(witness.PlutusV1Scripts),
+		PlutusV2Scripts: ConvertByteSliceSliceToStringSlice(witness.PlutusV2Scripts),
+		PlutusV3Scripts: ConvertByteSliceSliceToStringSlice(witness.PlutusV3Scripts),
 		Redeemers:       ConvertRedeemersToViewModels(witness.Redeemers),
 	}
 }
@@ -113,7 +111,7 @@ func ConvertWitnessModelToViewModel(witness models.Witness) Witness {
 func ConvertByteSliceSliceToStringSlice(byteSlices [][]byte) []string {
 	stringSlice := []string{}
 	for _, byteSlice := range byteSlices {
-		stringSlice = append(stringSlice, string(byteSlice))
+		stringSlice = append(stringSlice, hex.EncodeToString(byteSlice))
 	}
 	return stringSlice
 }

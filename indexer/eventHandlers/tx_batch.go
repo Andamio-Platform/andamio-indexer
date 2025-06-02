@@ -2,14 +2,14 @@ package eventHandlers
 
 import (
 	"log/slog"
-	"sync"
 
+	"github.com/Andamio-Platform/andamio-indexer/database"      // Import the database package
 	"github.com/Andamio-Platform/andamio-indexer/indexer/cache" // Import the cache package
 	input_chainsync "github.com/blinklabs-io/adder/input/chainsync"
 )
 
 // AddToTransactionBatch adds a transaction event to the cache
-func AddToTransactionBatch(eventTx input_chainsync.TransactionEvent, eventCtx input_chainsync.TransactionContext) {
+func AddToTransactionBatch(db *database.Database, eventTx input_chainsync.TransactionEvent, eventCtx input_chainsync.TransactionContext) {
 	txCache := cache.GetTransactionCache()
 	if txCache != nil {
 		txCache.Add(eventTx, eventCtx)
@@ -17,7 +17,7 @@ func AddToTransactionBatch(eventTx input_chainsync.TransactionEvent, eventCtx in
 		// Check if cache limit is reached and process the batch
 		if txCache.Len() >= txCache.Limit() {
 			slog.Info("Transaction batch limit reached, processing batch.")
-			go ProcessTransactionBatch() // Process in a goroutine to avoid blocking
+			go ProcessTransactionBatch(db) // Process in a goroutine to avoid blocking, passing the database instance
 		}
 	} else {
 		slog.Error("Transaction cache not initialized when trying to add transaction.")
@@ -25,7 +25,7 @@ func AddToTransactionBatch(eventTx input_chainsync.TransactionEvent, eventCtx in
 }
 
 // ProcessTransactionBatch processes the cached transactions
-func ProcessTransactionBatch() {
+func ProcessTransactionBatch(db *database.Database) {
 	txCache := cache.GetTransactionCache()
 	if txCache == nil {
 		slog.Error("Transaction cache not initialized")
@@ -44,22 +44,47 @@ func ProcessTransactionBatch() {
 
 	slog.Info("Processing transaction batch", "count", len(transactionsToProcess))
 
-	var wg sync.WaitGroup
-	for _, item := range transactionsToProcess {
-		wg.Add(1)
-		go func(txEvent input_chainsync.TransactionEvent, txContext input_chainsync.TransactionContext) {
-			defer wg.Done()
-			slog.Debug("Processing individual transaction in batch.", "txHash", string(txEvent.Transaction.Hash().Bytes()))
-			err := TxEvent(txEvent, txContext) // Call the TxEvent function to process the transaction
-			if err != nil {
-				slog.Error("Error processing transaction in batch", "txHash", string(txEvent.Transaction.Hash().Bytes()), "error", err)
-			} else {
-				slog.Debug("Finished processing individual transaction in batch.", "txHash", string(txEvent.Transaction.Hash().Bytes()))
+	// Start a single transaction for the batch
+	txn := db.Transaction(true)
+	defer func() {
+		if r := recover(); r != nil {
+			slog.Error("Panic occurred during batch processing, rolling back transaction.", "panic", r)
+			if err := txn.Rollback(); err != nil {
+				slog.Error("Failed to rollback transaction after panic.", "error", err)
 			}
-		}(item.Event, item.Context)
+			panic(r) // Re-panic after rollback
+		}
+	}()
+
+	var batchErr error
+	for _, item := range transactionsToProcess {
+		slog.Debug("Processing individual transaction in batch.", "txHash", item.Event.Transaction.Hash())
+		// Pass the transaction to the TxEvent function
+		err := TxEvent(db.Logger(), item.Event, item.Context, txn)
+		if err != nil {
+			slog.Error("Error processing transaction in batch", "txHash", string(item.Event.Transaction.Hash().Bytes()), "error", err)
+			batchErr = err // Store the first error encountered
+			// Continue processing other transactions in the batch to potentially log more errors,
+			// but the transaction will be rolled back due to batchErr being set.
+		} else {
+			slog.Debug("Finished processing individual transaction in batch.", "txHash", item.Event.Transaction.Hash())
+		}
 	}
 
-	wg.Wait() // Wait for all goroutines to complete
-
-	slog.Info("Finished processing transaction batch")
+	// Commit or rollback the transaction based on whether an error occurred
+	if batchErr != nil {
+		slog.Error("Rolling back transaction due to batch processing error.")
+		if err := txn.Rollback(); err != nil {
+			slog.Error("Failed to rollback transaction.", "error", err)
+			return // Return the original batchErr
+		}
+		return // Return the original batchErr
+	} else {
+		slog.Info("Committing transaction batch.")
+		if err := txn.Commit(); err != nil {
+			slog.Error("Failed to commit transaction.", "error", err)
+			return // Return the commit error
+		}
+		slog.Info("Finished processing transaction batch.")
+	}
 }

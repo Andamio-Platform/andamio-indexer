@@ -9,7 +9,7 @@ import (
 	fiberLogger "github.com/gofiber/fiber/v2/log"
 )
 
-// GetTransactionByHashHandler handles the request to get a transaction by its hash.
+// GetTransactionByTxHashHandler handles the request to get a transaction by its hash.
 //
 //	@Summary		Get Transaction by Hash
 //	@Description	Retrieves a transaction by its hash.
@@ -24,7 +24,7 @@ import (
 //	@Failure		404		{object}	object{error=string}		"Transaction not found."
 //	@Failure		500		{object}	object{error=string}		"Internal server error."
 //	@Router			/transactions/{tx_hash} [get]
-func GetTransactionByHashHandler(db *database.Database) fiber.Handler { // Use fiber.Ctx and accept db
+func GetTransactionByTxHashHandler(db *database.Database) fiber.Handler { // Use fiber.Ctx and accept db
 	return func(c *fiber.Ctx) error {
 		txHashStr := c.Params("tx_hash")
 		txHash, err := hex.DecodeString(txHashStr)
@@ -38,32 +38,33 @@ func GetTransactionByHashHandler(db *database.Database) fiber.Handler { // Use f
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "database not available"}) // Use fiber JSON
 		}
 
-		transaction, err := db.Metadata().GetTxByTxHash(nil, txHash)
+		tx, err := db.GetTxByTxHash(txHash, nil)
 		if err != nil {
 			fiberLogger.Errorf("Failed to get transaction by hash %s: %v", txHashStr, err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get transaction by hash"})
 		}
 
-		if transaction == nil {
+		if tx == nil {
 			fiberLogger.Errorf("Transaction not found for hash %s", txHashStr)
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Transaction not found"})
 		}
 
 		// Convert database model to view model
 		transactionViewModel := viewmodel.Transaction{
-			TransactionHash: string(transaction.TransactionHash),
-			BlockNumber:     transaction.BlockNumber,
-			SlotNumber:      transaction.SlotNumber,
-			Inputs:          viewmodel.ConvertTransactionInputsToViewModels(transaction.Inputs),
-			Outputs:         viewmodel.ConvertTransactionOutputsToViewModels(transaction.Outputs),
-			Fee:             transaction.Fee,
-			TTL:             transaction.TTL,
-			BlockHash:       string(transaction.BlockHash),
-			Metadata:        string(transaction.Metadata), // CBOR string representation
-			ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(transaction.ReferenceInputs),
-			Withdrawals:     transaction.Withdrawals,
-			Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(transaction.Certificates), // Convert [][]byte to []string
-			Witness:         viewmodel.ConvertWitnessModelToViewModel(transaction.Witness),
+			TransactionHash: hex.EncodeToString(tx.TransactionHash),
+			BlockNumber:     tx.BlockNumber,
+			SlotNumber:      tx.SlotNumber,
+			Inputs:          viewmodel.ConvertTransactionInputsToViewModels(tx.Inputs),
+			Outputs:         viewmodel.ConvertTransactionOutputsToViewModels(tx.Outputs),
+			Fee:             tx.Fee,
+			TTL:             tx.TTL,
+			BlockHash:       string(tx.BlockHash),
+			Metadata:        hex.EncodeToString(tx.Metadata),
+			ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(tx.ReferenceInputs),
+			Withdrawals:     tx.Withdrawals,
+			Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates),
+			Witness:         viewmodel.ConvertWitnessModelToViewModel(tx.Witness),
+			TransactionCBOR: hex.EncodeToString(tx.TransactionCBOR),
 		}
 
 		return c.Status(fiber.StatusOK).JSON(transactionViewModel) // Use fiber JSON

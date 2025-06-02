@@ -4,7 +4,7 @@ import (
 	"container/list"
 	"sync"
 
-	"github.com/Andamio-Platform/andamio-indexer/constants"
+	"github.com/Andamio-Platform/andamio-indexer/config"
 	input_chainsync "github.com/blinklabs-io/adder/input/chainsync"
 )
 
@@ -60,8 +60,7 @@ func InitTransactionCache(limit int) {
 func GetTransactionCache() *TransactionCache {
 	// Ensure the cache is initialized before returning
 	if globalTransactionCache == nil {
-
-		InitTransactionCache(constants.TRANSACTION_CACHE_LIMIT)
+		InitTransactionCache(config.GetGlobalConfig().Indexer.TrancactionCacheLimit)
 	}
 	return globalTransactionCache
 }

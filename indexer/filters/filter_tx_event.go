@@ -8,9 +8,11 @@ import (
 	eventHandlers "github.com/Andamio-Platform/andamio-indexer/indexer/eventHandlers" // Import the eventHandlers package
 	"github.com/blinklabs-io/adder/event"
 	input_chainsync "github.com/blinklabs-io/adder/input/chainsync"
+
+	"github.com/Andamio-Platform/andamio-indexer/database" // Import the database package
 )
 
-func FilterTxEvent(evt event.Event) error {
+func FilterTxEvent(db *database.Database, evt event.Event) error {
 	slog.Debug("Received event from pipeline output", "eventType", evt.Type)
 	if evt.Type == "chainsync.transaction" {
 		slog.Debug("Processing chainsync.transaction event")
@@ -109,7 +111,7 @@ func FilterTxEvent(evt event.Event) error {
 		// If the transaction meets filtering criteria and has a certificate, add to batch
 		if shouldProcess {
 			slog.Info("Transaction meets filtering criteria, adding to batch.", "txHash", fmt.Sprintf("%x", eventTx.Transaction.Hash().Bytes()))
-			eventHandlers.AddToTransactionBatch(eventTx, eventCtx)
+			eventHandlers.AddToTransactionBatch(db, eventTx, eventCtx)
 		} else {
 			slog.Debug("Transaction does not meet filtering criteria, skipping.", "txHash", fmt.Sprintf("%x", eventTx.Transaction.Hash().Bytes()))
 		}

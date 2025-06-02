@@ -7,6 +7,7 @@ import (
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
+	"github.com/Andamio-Platform/andamio-indexer/viewmodel"
 )
 
 // GetAssetsByAddressHandler godoc
@@ -65,6 +66,6 @@ func GetAssetsByAddressHandler(db *database.Database, logger *slog.Logger) fiber
 			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "no assets found for this address"})
 		}
 
-		return c.Status(fiber.StatusOK).JSON(assets)
+		return c.Status(fiber.StatusOK).JSON(viewmodel.ConvertAssetModelsToViewModels(assets))
 	}
 }

@@ -19,7 +19,7 @@ import (
 // @Failure 400 {object} errors.ServerError "Bad request"
 // @Failure 404 {object} errors.ServerError "Transaction not found"
 // @Failure 500 {object} errors.ServerError "Server error"
-// @Router /indexer/transactions/{tx_hash}/utxos/inputs [get]
+// @Router /transactions/{tx_hash}/utxos/inputs [get]
 func GetUTxOsInputsByTransactionHandler(db *database.Database) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		txHashStr := c.Params("tx_hash")

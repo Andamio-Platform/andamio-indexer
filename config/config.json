@@ -1,7 +1,19 @@
 {
   "network": {
     "magic": 1,
-    "socketPath": "/home/mixaxim_dev/network/preprod/ipc/node.socket"
+    "localCardanoNodesocketPath": "/home/mixaxim_dev/network/preprod/ipc/node.socket",
+    "localCardanoNodeEndpoint": "localhost:9001",
+    "localKupoEndpoint": "http://localhost:1442",
+    "blinklabKupoEndpoint": "https://preprod-kupo.blinklabs.io",
+    "CFCardanoNodeEndpoint": "preprod-node.play.dev.cardano.org:3001"
+  },
+  "indexer": {
+    "host": "142.132.201.159:42069",
+    "APIBaseURL": "http://142.132.201.159:42069/api/v1/indexer",
+    "swaggerURL": "http://142.132.201.159:42069/api/v1/indexer/docs/swagger.json",
+    "intercerptHash": "cd510710d2d680240540595aea3306750ad275e38ab4511eb10d2b5e02cc0186",
+    "interceptSlot": 82402528,
+    "trancactionCacheLimit": 1
   },
   "database": {
     "databaseDir": "./db"

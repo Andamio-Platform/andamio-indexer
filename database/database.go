@@ -16,8 +16,8 @@ package database
 
 import (
 	"errors"
-	"io"
 	"log/slog"
+	"os"
 	"sync"
 
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin/blob"
@@ -49,7 +49,10 @@ func (d *Database) DataDir() string {
 
 // Logger returns the logger instance
 func (d *Database) Logger() *slog.Logger {
-	return d.logger
+	if d.logger != nil {
+		return d.logger
+	}
+	return slog.Default()
 }
 
 // Metadata returns the underlying metadata store instance
@@ -106,7 +109,7 @@ func (d *Database) init() error {
 	if d.logger == nil {
 		// Create logger to throw away logs
 		// We do this so we don't have to add guards around every log operation
-		d.logger = slog.New(slog.NewJSONHandler(io.Discard, nil))
+		d.logger = slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}))
 	}
 	// Check commit timestamp
 	slog.Info("Checking commit timestamp...")

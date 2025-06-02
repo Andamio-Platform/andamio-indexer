@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/Andamio-Platform/andamio-indexer/constants"
+	"github.com/Andamio-Platform/andamio-indexer/tests"
 )
 
 // Define a struct to match the expected response structure for the latest block endpoint.
@@ -23,7 +23,7 @@ func TestGetLatestBlock(t *testing.T) {
 	// The setupTestEnvironment function in api_test.go handles starting the indexer and waiting for readiness.
 	// We assume that by the time this test runs, the indexer has indexed at least one block.
 
-	endpoint := constants.API_BASE_URL + "/metrics/latest-block"
+	endpoint := tests.API_BASE_URL + "/metrics/latest-block"
 	resp, err := http.Get(endpoint)
 	if err != nil {
 		t.Fatalf("Failed to send GET request to %s: %v", endpoint, err)

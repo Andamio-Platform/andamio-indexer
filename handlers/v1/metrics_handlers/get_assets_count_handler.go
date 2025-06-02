@@ -4,30 +4,27 @@ import (
 	"log/slog"
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
-	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 	"github.com/gofiber/fiber/v2"
 )
 
 // GetAssetsCountHandler godoc
-// @Summary Get Total Indexed Assets Count
-// @Description Retrieves the total number of indexed assets.
+// @Summary Get Total Unique Assets Count
+// @Description Retrieves the total number of unique assets from the database.
 // @ID getAssetsCount
 // @Tags Metrics
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Success 200 {object} object{count=int} "Successfully retrieved assets count."
+// @Success 200 {object} object{count=int64} "Successfully retrieved unique assets count."
 // @Failure 500 {object} object{error=string} "Internal server error."
 // @Router /metrics/assets/count [get]
 func GetAssetsCountHandler(db *database.Database, logger *slog.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		var count int64
-		err := db.Metadata().DB().Model(&models.Asset{}).Count(&count).Error
-
+		count, err := db.Metadata().CountUniqueAssets(nil)
 		if err != nil {
-			logger.Error("Error getting asset count", "error", err)
+			logger.Error("Error getting unique asset count", "error", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-				"error": "Failed to get asset count",
+				"error": "Failed to get unique asset count",
 			})
 		}
 

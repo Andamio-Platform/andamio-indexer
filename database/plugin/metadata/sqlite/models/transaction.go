@@ -4,6 +4,8 @@ import (
 	"database/sql/driver"
 	"encoding/json"
 	"errors"
+
+	"github.com/Andamio-Platform/andamio-indexer/database/types"
 )
 
 // Assuming byteSliceJsonHex is intended to be stored as a byte slice
@@ -41,14 +43,14 @@ type Transaction struct {
 	SlotNumber      uint64              `gorm:"index" json:"slot_number"`
 	TransactionHash []byte              `gorm:"index" json:"transaction_hash"`
 	Inputs          []TransactionInput  `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"inputs"`
-	Outputs         []TransactionOutput `gorm:"foreignKey:UTxOID;references:TransactionHash" json:"outputs"`
+	Outputs         []TransactionOutput `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"outputs"`
 	ReferenceInputs []SimpleUTxO        `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"reference_inputs"`
 	Metadata        []byte              `gorm:"type:blob" json:"metadata"`
 	Fee             uint64              `gorm:"index" json:"fee"`
 	TTL             uint64              `gorm:"index" json:"ttl"`
-	Withdrawals     WithdrawalsMap      `gorm:"type:blob" json:"withdrawals"` // Use custom type and store as blob
+	Withdrawals     WithdrawalsMap      `gorm:"type:blob" json:"withdrawals"`
 	Witness         Witness             `gorm:"foreignKey:TransactionHash;references:TransactionHash" json:"witness"`
-	Certificates    [][]byte            `gorm:"type:blob" json:"certificate"`
+	Certificates    types.ByteSliceSlice `gorm:"type:blob" json:"certificate"`
 }
 
 // TableName overrides the table name
@@ -177,11 +179,11 @@ func (t *Transaction) SetWitness(witness Witness) {
 }
 
 // GetCertificate returns the Certificate of the Transaction.
-func (t *Transaction) GetCertificate() [][]byte {
+func (t *Transaction) GetCertificate() types.ByteSliceSlice {
 	return t.Certificates
 }
 
 // SetCertificate sets the Certificate of the Transaction.
-func (t *Transaction) SetCertificate(certificates [][]byte) {
+func (t *Transaction) SetCertificate(certificates types.ByteSliceSlice) {
 	t.Certificates = certificates
 }

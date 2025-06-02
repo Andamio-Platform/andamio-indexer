@@ -21,7 +21,7 @@ import (
 // @Failure		400		{object}	object{error=string}		"Invalid transaction hash."
 // @Failure		404		{object}	object{error=string}		"Transaction not found or no UTXO outputs found."
 // @Failure		500		{object}	object{error=string}		"Internal server error."
-// @Router			/indexer/transactions/{tx_hash}/utxos/outputs [get]
+// @Router			/transactions/{tx_hash}/utxos/outputs [get]
 func GetUTxOsOutputsByTransactionHandler(db *database.Database) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		txHashStr := c.Params("tx_hash")

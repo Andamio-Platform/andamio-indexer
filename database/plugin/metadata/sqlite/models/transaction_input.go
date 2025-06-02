@@ -2,14 +2,14 @@ package models
 
 type TransactionInput struct {
 	ID              uint    `gorm:"primaryKey" json:"id"`
-	TransactionHash []byte  `gorm:"type:blob" json:"transaction_hash"` // Removed index tag as it's not effective on blob types
-	UTxOID          []byte  `gorm:"type:blob" json:"utxo_id"`          // Removed index tag as it's not effective on blob types, composite index is on UTxOIDIndex
-	UTxOIDIndex     uint32  `gorm:"index:tx_input_utxo_idx" json:"utxo_index"`
-	Address         []byte  `gorm:"type:blob" json:"address"` // Removed index tag as it's not effective on blob types
+	TransactionHash []byte  `gorm:"index;type:blob" json:"transaction_hash"`
+	UTxOID          []byte  `gorm:"type:blob;column:utxo_id" json:"utxo_id"`
+	UTxOIDIndex     uint32  `gorm:"index:tx_input_utxo_idx;column:utxo_index" json:"utxo_index"`
+	Address         []byte  `gorm:"type:blob" json:"address"`
 	Amount          uint64  `gorm:"index" json:"amount"`
-	Asset           []Asset `gorm:"foreignKey:UTxOID;references:UTxOID;foreignKey:UTxOIDIndex;references:UTxOIDIndex" json:"asset"` // Removed foreign key tag, should be on Asset struct
-	Datum           Datum   `gorm:"foreignKey:UTxOID;references:UTxOID;foreignKey:UTxOIDIndex;references:UTxOIDIndex" json:"datum"` // Removed foreign key tag, should be on Datum struct
-	Cbor            []byte  `gorm:"type:blob" json:"cbor"`                                                                          // Removed index tag as it's not effective on blob types
+	Asset           []Asset `gorm:"foreignKey:UTxOID,UTxOIDIndex;references:UTxOID,UTxOIDIndex" json:"asset"`
+	Datum           Datum   `gorm:"foreignKey:UTxOID,UTxOIDIndex;references:UTxOID,UTxOIDIndex" json:"datum"`
+	Cbor            []byte  `gorm:"type:blob" json:"cbor"`
 }
 
 func (TransactionInput) TableName() string {

@@ -24,14 +24,10 @@ import (
 // @Failure		400		{object}	object{error=string}		"Invalid token name or pagination parameters."
 // @Failure		404		{object}	object{error=string}		"Token name not found or no transactions found."
 // @Failure		500		{object}	object{error=string}		"Internal server error."
-// @Router			/indexer/assets/token/{tokenname}/transactions [get]
+// @Router			/assets/token/{tokenname}/transactions [get]
 func GetTransactionsByTokenNameHandler(db *database.Database) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		tokenNameStr := c.Params("tokenname")
-		tokenName, err := hex.DecodeString(tokenNameStr)
-		if err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid token name"})
-		}
+		tokenName := c.Params("tokenname")
 
 		// Get pagination parameters
 		limitStr := c.Query("limit", "100")
@@ -47,16 +43,15 @@ func GetTransactionsByTokenNameHandler(db *database.Database) fiber.Handler {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid offset parameter"})
 		}
 
-		transactions, err := db.Metadata().GetTxsByTokenName(nil, tokenName, limit, offset)
+		transactions, err := db.GetTxsByTokenName([]byte(tokenName), limit, offset, nil)
 		if err != nil {
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get transactions by token name"})
 		}
 
-		// Convert database models to view models
 		transactionViewModels := []viewmodel.Transaction{}
 		for _, tx := range transactions {
 			transactionViewModels = append(transactionViewModels, viewmodel.Transaction{
-				TransactionHash: string(tx.TransactionHash),
+				TransactionHash: hex.EncodeToString(tx.TransactionHash),
 				BlockNumber:     tx.BlockNumber,
 				SlotNumber:      tx.SlotNumber,
 				Inputs:          viewmodel.ConvertTransactionInputsToViewModels(tx.Inputs),
@@ -64,11 +59,12 @@ func GetTransactionsByTokenNameHandler(db *database.Database) fiber.Handler {
 				Fee:             tx.Fee,
 				TTL:             tx.TTL,
 				BlockHash:       string(tx.BlockHash),
-				Metadata:        string(tx.Metadata), // CBOR string representation
+				Metadata:        hex.EncodeToString(tx.Metadata),
 				ReferenceInputs: viewmodel.ConvertSimpleUTxOModelsToViewModels(tx.ReferenceInputs),
 				Withdrawals:     tx.Withdrawals,
-				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates), // Convert [][]byte to []string
+				Certificates:    viewmodel.ConvertByteSliceSliceToStringSlice(tx.Certificates),
 				Witness:         viewmodel.ConvertWitnessModelToViewModel(tx.Witness),
+				TransactionCBOR: hex.EncodeToString(tx.TransactionCBOR),
 			})
 		}
 

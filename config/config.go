@@ -17,14 +17,34 @@ var (
 
 type Config struct {
 	Network  Network  `json:"network"`
+	Indexer  Indexer  `json:"indexer"`
 	Database Database `json:"database"`
 	Andamio  Andamio  `json:"andamio"`
 }
 
 type Network struct {
-	Magic      uint32 `json:"magic"`
-	SocketPath string `json:"socketPath"`
+	Magic                      uint32 `json:"magic"`
+	LocalCardanoNodeSocketPath string `json:"localCardanoNodesocketPath"`
+	LocalCardanoNodeEndpoint   string `json:"localCardanoNodeEndpoint"`
+	LocalKupoEndpoint          string `json:"localKupoEndpoint"`
+	BlinklabKupoEndpoint       string `json:"blinklabKupoEndpoint"`
+	CFCardanoNodeEndpoint      string `json:"CFCardanoNodeEndpoint"`
 }
+
+// "intercerptHash": "cd510710d2d680240540595aea3306750ad275e38ab4511eb10d2b5e02cc0186",
+// "interceptSlot": 82402528,
+// "intercerptHash": "6c7a5d8036284a4c1af79b62bd6702ac4bb23d33d2c09596272091688e986bcb",
+// "interceptSlot": 88200000,
+
+type Indexer struct {
+	Host                  string `json:"host"`
+	APIBaseURL            string `json:"APIBaseURL"`
+	SwaggerURL            string `json:"swaggerURL"`
+	IntercerptHash        string `json:"intercerptHash"`
+	InterceptSlot         uint64 `json:"interceptSlot"`
+	TrancactionCacheLimit int    `json:"trancactionCacheLimit"`
+}
+
 type Database struct {
 	DatabaseDIR string `json:"databaseDir"`
 }

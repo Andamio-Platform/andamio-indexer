@@ -1,12 +1,12 @@
 package asset_handlers
 
 import (
-	"encoding/hex"
 	"log/slog"
 
 	"github.com/gofiber/fiber/v2"
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
+	"github.com/Andamio-Platform/andamio-indexer/viewmodel"
 )
 
 // GetUTxOsByAssetFingerprintHandler godoc
@@ -17,26 +17,20 @@ import (
 // @Security ApiKeyAuth
 // @Accept json
 // @Produce json
-// @Param asset_fingerprint path string true "The asset fingerprint (hex-encoded) to retrieve UTxOs for."
+// @Param asset_fingerprint path string true "The asset fingerprint to retrieve UTxOs for."
 // @Param limit query int false "Maximum number of results to return." default(100)
 // @Param offset query int false "Number of results to skip." default(0)
-// @Success 200 {array} viewmodel.SimpleUTxO "Successfully retrieved UTxOs."
+// @Success 200 {object} viewmodel.TransactionUTxOs "Successfully retrieved UTxOs."
 // @Failure 400 {object} object{error=string} "Invalid asset fingerprint or pagination parameters."
 // @Failure 404 {object} object{error=string} "Asset fingerprint not found or no UTxOs found."
 // @Failure 500 {object} object{error=string} "Internal server error."
-// @Router /assets/{asset_fingerprint}/utxos [get]
+// @Router /assets/fingerprint/{asset_fingerprint}/utxos [get]
 func GetUTxOsByAssetFingerprintHandler(db *database.Database, logger *slog.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		assetFingerprintHex := c.Params("asset_fingerprint")
-		if assetFingerprintHex == "" {
+		assetFingerprint := c.Params("asset_fingerprint")
+		if assetFingerprint == "" {
 			logger.Error("asset_fingerprint path parameter is missing")
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "asset_fingerprint path parameter is missing"})
-		}
-
-		assetFingerprint, err := hex.DecodeString(assetFingerprintHex)
-		if err != nil {
-			logger.Error("invalid asset_fingerprint hex encoding", "error", err)
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid asset_fingerprint hex encoding"})
 		}
 
 		limit := c.QueryInt("limit", 100)
@@ -47,17 +41,31 @@ func GetUTxOsByAssetFingerprintHandler(db *database.Database, logger *slog.Logge
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "invalid pagination parameters"})
 		}
 
-		utxos, err := db.Metadata().GetUTxOsByAssetFingerprint(nil, assetFingerprint, limit, offset)
+		inputs, err := db.Metadata().GetTransactionInputsByAssetFingerprint(nil, []byte(assetFingerprint), limit, offset)
 		if err != nil {
-			logger.Error("failed to get UTxOs by asset fingerprint", "asset_fingerprint", assetFingerprintHex, "error", err)
-			// Handle specific errors like not found
-			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to retrieve UTxOs"})
+			logger.Error("failed to get transaction inputs by asset fingerprint", "asset_fingerprint", assetFingerprint, "error", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to retrieve transaction inputs"})
 		}
 
-		if len(utxos) == 0 {
-			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "no UTxOs found for the given asset fingerprint"})
+		outputs, err := db.Metadata().GetTransactionOutputsByAssetFingerprint(nil, []byte(assetFingerprint), limit, offset)
+		if err != nil {
+			logger.Error("failed to get transaction outputs by asset fingerprint", "asset_fingerprint", assetFingerprint, "error", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "failed to retrieve transaction outputs"})
 		}
 
-		return c.Status(fiber.StatusOK).JSON(utxos)
+		if len(inputs) == 0 && len(outputs) == 0 {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "no UTxOs (inputs or outputs) found for the given asset fingerprint"})
+		}
+
+		// Convert models to view models
+		inputViewModels := viewmodel.ConvertTransactionInputsToViewModels(inputs)
+		outputViewModels := viewmodel.ConvertTransactionOutputsToViewModels(outputs)
+
+		transactionUTxOs := viewmodel.TransactionUTxOs{
+			Inputs:  inputViewModels,
+			Outputs: outputViewModels,
+		}
+
+		return c.Status(fiber.StatusOK).JSON(transactionUTxOs)
 	}
 }

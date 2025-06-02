@@ -7,11 +7,11 @@ import (
 	"os"
 
 	"github.com/Andamio-Platform/andamio-indexer/config"
-	"github.com/Andamio-Platform/andamio-indexer/constants"
 	"github.com/Andamio-Platform/andamio-indexer/database"
 	plugin "github.com/Andamio-Platform/andamio-indexer/database/plugin"
 	"github.com/Andamio-Platform/andamio-indexer/indexer/cache"
 	"github.com/Andamio-Platform/andamio-indexer/indexer/filters"
+	"github.com/blinklabs-io/adder/event" // Import the event package
 	filter_event "github.com/blinklabs-io/adder/filter/event"
 	input_chainsync "github.com/blinklabs-io/adder/input/chainsync"
 	output_embedded "github.com/blinklabs-io/adder/output/embedded"
@@ -19,7 +19,7 @@ import (
 	ocommon "github.com/blinklabs-io/gouroboros/protocol/common"
 )
 
-func StartIndexer(logger plugin.Logger) error {
+func StartIndexer(db *database.Database, logger plugin.Logger) error {
 	slog.Info("Starting indexer...")
 
 	// Load config
@@ -27,13 +27,12 @@ func StartIndexer(logger plugin.Logger) error {
 	slog.Info("Configuration loaded.")
 
 	// Create the CursorStore using the BadgerDB blob store
-	globalDB := database.GetGlobalDB()
 
 	// Initialize transaction cache with a limit (e.g., 100)
-	cache.InitTransactionCache(100)
-	slog.Info("Transaction cache initialized.", "limit", 100)
+	cache.InitTransactionCache(cfg.Indexer.TrancactionCacheLimit)
+	slog.Info("Transaction cache initialized.", "limit", cfg.Indexer.TrancactionCacheLimit)
 
-	cursorStore := database.NewCursorStore(globalDB)
+	cursorStore := database.NewCursorStore(db)
 	slog.Info("Cursor store created.")
 
 	// Create pipeline
@@ -42,13 +41,12 @@ func StartIndexer(logger plugin.Logger) error {
 
 	// Configure pipeline input
 	inputOpts := []input_chainsync.ChainSyncOptionFunc{
-		input_chainsync.WithBulkMode(true),
+		input_chainsync.WithBulkMode(false),
 		input_chainsync.WithAutoReconnect(true),
-		input_chainsync.WithIntersectTip(false),
+		input_chainsync.WithIncludeCbor(true),
 		input_chainsync.WithLogger(logger),
 		input_chainsync.WithStatusUpdateFunc(func(status input_chainsync.ChainSyncStatus) {
 			slog.Info("Chain sync status update", "slot", status.SlotNumber, "blockHash", status.BlockHash)
-			// Use the cursorStore instance to update the cursor
 			blockHashBytes := []byte(status.BlockHash)
 			if err := cursorStore.UpdateCursor(status.SlotNumber, blockHashBytes); err != nil {
 				slog.Error(
@@ -57,10 +55,12 @@ func StartIndexer(logger plugin.Logger) error {
 			}
 		}),
 		input_chainsync.WithNetworkMagic(cfg.Network.Magic),
-		input_chainsync.WithKupoUrl(constants.BLINKLABS_KUPO_ENDPOINT),
-		input_chainsync.WithIncludeCbor(true),
-		// input_chainsync.WithSocketPath(cfg.Network.SocketPath),
-		input_chainsync.WithAddress("preprod-node.play.dev.cardano.org:3001"),
+		// input_chainsync.WithIntersectTip(true),
+		// input_chainsync.WithKupoUrl(cfg.Network.BlinklabKupoEndpoint),
+		input_chainsync.WithKupoUrl(cfg.Network.LocalKupoEndpoint),
+		// input_chainsync.WithSocketPath(cfg.Network.LocalCardanoNodeSocketPath), // we cant use this becsue the code in the addre for this opton is not complete
+		input_chainsync.WithAddress(cfg.Network.LocalCardanoNodeEndpoint),
+		// input_chainsync.WithAddress(cfg.Network.CFCardanoNodeEndpoint),
 	}
 
 	// Get the last saved cursor state using the cursorStore instance
@@ -73,7 +73,7 @@ func StartIndexer(logger plugin.Logger) error {
 	// Use the retrieved cursor state for intersection
 	// Check if a cursor state was found (SlotNumber will be non-zero if found)
 	if cursorState.SlotNumber > 0 || len(cursorState.BlockHash) > 0 {
-		slog.Info("Found previous cursor state, intersecting.", "slot", cursorState.SlotNumber, "blockHash", cursorState.BlockHash)
+		slog.Info("Found previous cursor state, intersecting.", "slot", cursorState.SlotNumber, "blockHash", string(cursorState.BlockHash))
 		hashBytes, err := hex.DecodeString(string(cursorState.BlockHash))
 		if err != nil {
 			return nil
@@ -92,6 +92,20 @@ func StartIndexer(logger plugin.Logger) error {
 
 		// If no cursor state is found, intersect at the tip (already handled by WithIntersectTip)
 		slog.Info("No previous cursor state found, starting from Andamio genesis.")
+		hashBytes, err := hex.DecodeString(string(cfg.Indexer.IntercerptHash))
+		if err != nil {
+			return nil
+		}
+		inputOpts = append(
+			inputOpts,
+			input_chainsync.WithIntersectPoints(
+				[]ocommon.Point{
+					{
+						Hash: hashBytes,
+						Slot: cfg.Indexer.InterceptSlot,
+					},
+				},
+			))
 	}
 
 	input := input_chainsync.New(
@@ -109,8 +123,14 @@ func StartIndexer(logger plugin.Logger) error {
 	slog.Info("Event filter configured.")
 
 	// Configure pipeline output
+	// Configure pipeline output
+	// Create an adapter function to pass the database instance to FilterTxEvent
+	filterTxEventAdapter := func(evt event.Event) error {
+		return filters.FilterTxEvent(db, evt)
+	}
+
 	output := output_embedded.New(
-		output_embedded.WithCallbackFunc(filters.FilterTxEvent),
+		output_embedded.WithCallbackFunc(filterTxEventAdapter),
 	)
 
 	//! For Debug Purpose
