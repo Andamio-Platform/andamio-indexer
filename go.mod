@@ -8,7 +8,7 @@ require (
 	github.com/blinklabs-io/gouroboros v0.120.0
 	github.com/dgraph-io/badger/v4 v4.7.0
 	github.com/glebarez/sqlite v1.11.0
-	github.com/gofiber/fiber/v2 v2.52.6
+	github.com/gofiber/fiber/v2 v2.52.7
 	github.com/prometheus/client_golang v1.22.0
 	gorm.io/gorm v1.25.12
 	gorm.io/plugin/opentelemetry v0.1.12
@@ -17,6 +17,7 @@ require (
 require (
 	github.com/blinklabs-io/adder v0.29.0
 	github.com/gofiber/swagger v1.1.1
+	github.com/lmittmann/tint v1.1.1
 	github.com/swaggo/swag v1.16.4
 )
 
@@ -51,7 +52,6 @@ require (
 	github.com/josharian/intern v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.4.0 // indirect
 	github.com/klauspost/compress v1.18.0 // indirect
-	github.com/lmittmann/tint v1.1.1 // indirect
 	github.com/mailru/easyjson v0.7.7 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
