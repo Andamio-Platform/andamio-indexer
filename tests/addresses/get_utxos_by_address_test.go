@@ -40,7 +40,7 @@ func TestGetUTxOsByAddress(t *testing.T) {
 	// Check if the expected UTxO is present in the list
 	foundExpectedUTxO := false
 	for _, utxo := range utxos {
-		if string(utxo.TransactionHash) == tests.EXPECTED_TX_HASH && utxo.UTxOIDIndex == tests.EXPECTED_INDEX {
+		if string(utxo.TransactionHash) == tests.EXPECTED_OUTPUT_TX_HASH && utxo.UTxOIDIndex == tests.EXPECTED_OUTPUT_INDEX {
 			foundExpectedUTxO = true
 			// Optional: Add more specific validation for this UTxO if needed,
 			// e.g., checking amount, datum hash, or inline datum if known.
@@ -52,7 +52,7 @@ func TestGetUTxOsByAddress(t *testing.T) {
 
 	if !foundExpectedUTxO {
 		t.Errorf("Expected UTxO with TxHash %s and Index %d not found for address %s",
-			tests.EXPECTED_TX_HASH, tests.EXPECTED_INDEX, tests.TEST_ADDRESS)
+			tests.EXPECTED_OUTPUT_TX_HASH, tests.EXPECTED_OUTPUT_INDEX, tests.TEST_ADDRESS)
 	}
 
 	t.Logf("Successfully retrieved and validated UTxOs for address %s. Found %d UTxOs.", tests.TEST_ADDRESS, len(utxos))

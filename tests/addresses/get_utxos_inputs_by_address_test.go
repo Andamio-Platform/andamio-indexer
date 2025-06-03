@@ -41,7 +41,7 @@ func TestGetUTxOsInputsByAddress(t *testing.T) {
 	// Check if the expected transaction input is present in the list
 	foundExpectedInput := false
 	for _, input := range inputs {
-		if input.UTxOID == tests.EXPECTED_TX_HASH && input.UTxOIDIndex == tests.EXPECTED_INDEX {
+		if input.UTxOID == tests.EXPECTED_OUTPUT_TX_HASH && input.UTxOIDIndex == tests.EXPECTED_OUTPUT_INDEX {
 			foundExpectedInput = true
 			// Optional: Add more specific validation for this input if needed.
 			t.Logf("Found expected transaction input: TxHash=%s, Index=%d, Address=%s",
@@ -52,7 +52,7 @@ func TestGetUTxOsInputsByAddress(t *testing.T) {
 
 	if !foundExpectedInput {
 		t.Errorf("Expected transaction input with TxHash %s and Index %d not found for address %s",
-			tests.EXPECTED_TX_HASH, tests.EXPECTED_INDEX, tests.TEST_ADDRESS)
+			tests.EXPECTED_OUTPUT_TX_HASH, tests.EXPECTED_OUTPUT_INDEX, tests.TEST_ADDRESS)
 	}
 
 	t.Logf("Successfully retrieved and validated transaction inputs for address %s. Found %d inputs.", tests.TEST_ADDRESS, len(inputs))

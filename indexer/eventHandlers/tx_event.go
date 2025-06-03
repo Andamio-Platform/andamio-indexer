@@ -263,6 +263,8 @@ func TxEvent(logger *slog.Logger, eventTx input_chainsync.TransactionEvent, even
 
 	logger.Info("Saving transaction to database.", "txHash", fmt.Sprintf("%x", txHash))
 
+	// Extract and store unique addresses from inputs and outputs
+
 	err := txn.DB().NewTx(
 		[]byte(eventTx.BlockHash),
 		eventCtx.BlockNumber,

@@ -166,6 +166,21 @@ func SetGlobalDB(db *Database) {
 	globalDB = db
 }
 
+// GetUniqueAddressesCount retrieves the total count of unique addresses from all transactions, excluding a list of addresses.
+func (d *Database) GetUniqueAddressesCount(excludedAddresses []string) (int64, error) {
+	txn := d.MetadataTxn(false)
+	defer txn.Rollback()
+	return d.Metadata().GetUniqueAddressesCount(txn.Metadata(), excludedAddresses)
+}
+
+// GetTotalTransactionFees retrieves the total sum of all transaction fees.
+func (d *Database) GetTotalTransactionFees() (uint64, error) {
+	txn := d.MetadataTxn(false)
+	defer txn.Rollback()
+	return d.Metadata().GetTotalTransactionFees(txn.Metadata())
+}
+
+
 // GetGlobalDB returns the global database instance
 func GetGlobalDB() *Database {
 	globalMu.RLock()

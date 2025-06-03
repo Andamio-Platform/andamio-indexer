@@ -54,7 +54,8 @@ type MetadataStore interface {
 	CountTxs(txn *gorm.DB) (int64, error)
 	DeleteTxByHash(txn *gorm.DB, txHash []byte) error
 	DeleteTxsByBlockNumber(txn *gorm.DB, blockNumber uint64) error
-	GetUniqueAddressesCount(txn *gorm.DB) (int64, error)
+	GetUniqueAddressesCount(txn *gorm.DB, excludedAddresses []string) (int64, error)
+	GetTotalTransactionFees(txn *gorm.DB) (uint64, error)
 	GetTxInputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionInput, error)
 	GetTxOutputByUTxO(txn *gorm.DB, arg1 []byte, arg2 uint32) (*models.TransactionOutput, error)
 	GetTxByID(txn *gorm.DB, arg1 uint) (*models.Transaction, error)

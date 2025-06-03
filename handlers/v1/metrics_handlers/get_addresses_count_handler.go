@@ -4,12 +4,13 @@ import (
 	"log/slog"
 
 	"github.com/Andamio-Platform/andamio-indexer/database"
+	"github.com/Andamio-Platform/andamio-indexer/indexer/cache"
 	"github.com/gofiber/fiber/v2"
 )
 
 // GetAddressesCountHandler godoc
 // @Summary Get Total Unique Addresses Count
-// @Description Retrieves the total number of unique addresses from all transactions in the database.
+// @Description Retrieves the total number of unique addresses from all transactions in the database, excluding relevant addresses.
 // @ID getAddressesCount
 // @Tags Metrics
 // @Security ApiKeyAuth
@@ -20,7 +21,10 @@ import (
 // @Router /metrics/addresses/count [get]
 func GetAddressesCountHandler(db *database.Database, logger *slog.Logger) fiber.Handler {
 	return func(c *fiber.Ctx) error {
-		count, err := db.GetUniqueAddressesCount(nil)
+		relevantDataCache := cache.GetRelevantDataCache()
+		relevantAddresses := relevantDataCache.GetAddresses()
+
+		count, err := db.GetUniqueAddressesCount(relevantAddresses)
 		if err != nil {
 			logger.Error("Error getting unique addresses count", "error", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{

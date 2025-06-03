@@ -95,6 +95,7 @@ func RouterInit(router *fiber.App, db *database.Database, logger *slog.Logger) {
 	metrics.Get("/assets/count", metrics_handlers.GetAssetsCountHandler(globalDB, logger))
 	metrics.Get("/latest-block", metrics_handlers.GetLatestBlockHandler(globalDB, logger))
 	metrics.Get("/transactions/count", metrics_handlers.GetTransactionsCountHandler(globalDB, logger))
+	metrics.Get("/total_transaction_fees", metrics_handlers.GetTotalTransactionFeesHandler(globalDB))
 
 	// Redeemer handlers
 	redeemers := indexer.Group("/redeemers")

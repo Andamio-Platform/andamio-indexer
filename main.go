@@ -61,8 +61,8 @@ func main() {
 	}
 
 	logger := slog.New(tint.NewHandler(os.Stdout, &tint.Options{
-		Level: slog.LevelInfo,
-		// Level: slog.LevelDebug,
+		// Level: slog.LevelInfo,
+		Level:     slog.LevelDebug,
 		AddSource: true, // adds file and line number
 	}))
 	slog.SetDefault(logger)

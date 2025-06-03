@@ -759,7 +759,7 @@ paths:
       consumes:
       - application/json
       description: Retrieves the total number of unique addresses from all transactions
-        in the database.
+        in the database, excluding relevant addresses.
       operationId: getAddressesCount
       produces:
       - application/json
@@ -840,6 +840,35 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: Get Latest Indexed Block
+      tags:
+      - Metrics
+  /metrics/total_transaction_fees:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the total sum of all transaction fees across the entire
+        dataset.
+      operationId: getTotalTransactionFees
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Successfully retrieved total transaction fees.
+          schema:
+            properties:
+              total_transaction_fees:
+                type: string
+            type: object
+        "500":
+          description: Internal server error.
+          schema:
+            properties:
+              error:
+                type: string
+            type: object
+      security:
+      - ApiKeyAuth: []
+      summary: Get Total Transaction Fees
       tags:
       - Metrics
   /metrics/transactions/count:

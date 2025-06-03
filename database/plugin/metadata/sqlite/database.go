@@ -16,9 +16,6 @@ package sqlite
 
 import (
 	"errors"
-
-	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
-
 	"fmt"
 	"io/fs"
 	"log/slog"
@@ -27,6 +24,7 @@ import (
 	"time"
 
 	"github.com/Andamio-Platform/andamio-indexer/database/plugin"
+	"github.com/Andamio-Platform/andamio-indexer/database/plugin/metadata/sqlite/models"
 
 	"github.com/glebarez/sqlite"
 	"gorm.io/gorm"
@@ -238,4 +236,68 @@ func (d *MetadataStoreSqlite) Where(
 		db = d.DB()
 	}
 	return db.Where(query, args...)
+}
+
+// GetUniqueAddressesCount retrieves the total count of unique addresses from all transaction inputs and outputs, excluding a list of addresses.
+func (d *MetadataStoreSqlite) GetUniqueAddressesCount(
+	txn *gorm.DB,
+	excludedAddresses []string,
+) (int64, error) {
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
+
+	uniqueAddresses := make(map[string]struct{})
+
+	// Get addresses from TransactionInputs
+	var inputAddresses []string
+	if err := db.Model(&models.TransactionInput{}).Distinct("address").Pluck("address", &inputAddresses).Error; err != nil {
+		return 0, err
+	}
+	for _, addr := range inputAddresses {
+		uniqueAddresses[addr] = struct{}{}
+	}
+
+	// Get addresses from TransactionOutputs
+	var outputAddresses []string
+	if err := db.Model(&models.TransactionOutput{}).Distinct("address").Pluck("address", &outputAddresses).Error; err != nil {
+		return 0, err
+	}
+	for _, addr := range outputAddresses {
+		uniqueAddresses[addr] = struct{}{}
+	}
+
+	// Apply exclusion filter
+	filteredAddressesCount := 0
+	for addr := range uniqueAddresses {
+		isExcluded := false
+		for _, excludedAddr := range excludedAddresses {
+			if addr == excludedAddr {
+				isExcluded = true
+				break
+			}
+		}
+		if !isExcluded {
+			filteredAddressesCount++
+		}
+	}
+
+	return int64(filteredAddressesCount), nil
+}
+
+// GetTotalTransactionFees retrieves the total sum of all transaction fees.
+func (d *MetadataStoreSqlite) GetTotalTransactionFees(txn *gorm.DB) (uint64, error) {
+	db := txn
+	if db == nil {
+		db = d.DB()
+	}
+
+	var totalFees uint64
+	result := db.Model(&models.Transaction{}).Select("SUM(fee)").Row().Scan(&totalFees)
+	if result != nil {
+		return 0, result
+	}
+
+	return totalFees, nil
 }

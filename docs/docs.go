@@ -870,7 +870,7 @@ const docTemplate = `{
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "Retrieves the total number of unique addresses from all transactions in the database.",
+                "description": "Retrieves the total number of unique addresses from all transactions in the database, excluding relevant addresses.",
                 "consumes": [
                     "application/json"
                 ],
@@ -983,6 +983,51 @@ const docTemplate = `{
                                 },
                                 "slot_number": {
                                     "type": "integer"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "error": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/metrics/total_transaction_fees": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "Retrieves the total sum of all transaction fees across the entire dataset.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Metrics"
+                ],
+                "summary": "Get Total Transaction Fees",
+                "operationId": "getTotalTransactionFees",
+                "responses": {
+                    "200": {
+                        "description": "Successfully retrieved total transaction fees.",
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "total_transaction_fees": {
+                                    "type": "string"
                                 }
                             }
                         }

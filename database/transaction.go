@@ -761,35 +761,3 @@ func (d *Database) DeleteTxsByBlockNumber(blockNumber uint64, txn *Txn) error {
 }
 
 // GetUniqueAddressesCount retrieves the total count of unique addresses from all transactions.
-func (d *Database) GetUniqueAddressesCount(txn *Txn) (int64, error) {
-	if txn == nil {
-		txn = d.Transaction(false)
-		defer txn.Commit() //nolint:errcheck
-	}
-
-	uniqueAddresses := make(map[string]bool)
-	pageSize := 1000 // Process transactions in batches
-
-	totalTxs, err := d.metadata.CountTxs(txn.Metadata())
-	if err != nil {
-		return 0, err
-	}
-
-	for offset := 0; int64(offset) < totalTxs; offset += pageSize {
-		modelsTxs, err := d.metadata.GetTxs(txn.Metadata(), pageSize, offset)
-		if err != nil {
-			return 0, err
-		}
-
-		for _, modelTx := range modelsTxs {
-			for _, input := range modelTx.Inputs {
-				uniqueAddresses[string(input.Address)] = true
-			}
-			for _, output := range modelTx.Outputs {
-				uniqueAddresses[string(output.Address)] = true
-			}
-		}
-	}
-
-	return int64(len(uniqueAddresses)), nil
-}
